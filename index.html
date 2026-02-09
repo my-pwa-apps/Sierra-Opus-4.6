@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <meta name="theme-color" content="#000000">
+  <meta name="description" content="King's Quest: The Enchanted Isle - A Sierra On-Line style adventure game">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black">
+  <link rel="manifest" href="manifest.json">
+  <link rel="icon" type="image/png" href="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACAAAAAgCAYAAABzenr0AAAAAXNSR0IArs4c6QAAAMlJREFUWIXtl0EOwyAMRN+o9z9ldtmkQsCeGZC6yEoR4D8PY4ck+TgOx3F8JukjSUlydn57X2ft73urb/rz7AKSbiX5e/X5dDOz87P7q/u1Bb79TtLLzN5Wz2sBrr7/dICk8fmSpI2kS5KkmZnP7nsXOHn/2QFkAJkOgOD9v5bkJunOzG5rrx3g5BQQARwA8hMDAJBfHQCA/BcGACD/lQEAyH99AADS5xIAsOcaALD3GgCw9/4YAM61o7oA"></link>
+  <link rel="apple-touch-icon" href="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACAAAAAgCAYAAABzenr0AAAAAXNSR0IArs4c6QAAAMlJREFUWIXtl0EOwyAMRN+o9z9ldtmkQsCeGZC6yEoR4D8PY4ck+TgOx3F8JukjSUlydn57X2ft73urb/rz7AKSbiX5e/X5dDOz87P7q/u1Bb79TtLLzN5Wz2sBrr7/dICk8fmSpI2kS5KkmZnP7nsXOHn/2QFkAJkOgOD9v5bkJunOzG5rrx3g5BQQARwA8hMDAJBfHQCA/BcGACD/lQEAyH99AADS5xIAsOcaALD3GgCw9/4YAM61o7oA"></link>
+  <title>King's Quest: The Enchanted Isle</title>
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+  <!-- Name Screen -->
+  <div id="login-screen" class="screen active">
+    <div class="login-container">
+      <div class="sierra-logo">
+        <span class="logo-s">S</span><span class="logo-i">I</span><span class="logo-e">E</span><span class="logo-r">R</span><span class="logo-r2">R</span><span class="logo-a">A</span>
+      </div>
+      <h1 class="game-title">King's Quest</h1>
+      <h2 class="game-subtitle">The Enchanted Isle</h2>
+      <p class="credits">An Original Adventure by Sierra On-Line</p>
+      <div class="login-form">
+        <input type="text" id="username" placeholder="Enter Your Name" maxlength="20" autocomplete="username">
+        <button id="btn-play" class="sierra-btn">Play</button>
+        <p id="login-message" class="login-msg"></p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Title Screen -->
+  <div id="title-screen" class="screen">
+    <canvas id="title-canvas" width="640" height="400"></canvas>
+    <div class="title-overlay">
+      <div class="title-menu">
+        <button id="btn-new-game" class="sierra-btn">New Game</button>
+        <button id="btn-continue" class="sierra-btn">Continue</button>
+        <button id="btn-about" class="sierra-btn">About</button>
+        <button id="btn-vr" class="sierra-btn" style="display:none;">Enter VR</button>
+        <button id="btn-back" class="sierra-btn">Back</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Game Screen -->
+  <div id="game-screen" class="screen">
+    <div id="score-bar">
+      <span id="scene-name"></span>
+      <span id="score-display">Score: 0 of 145</span>
+      <button id="btn-menu" class="icon-btn" title="Menu">☰</button>
+    </div>
+    <div id="canvas-wrapper">
+      <canvas id="game-canvas" width="320" height="170"></canvas>
+    </div>
+    <div id="message-bar">
+      <p id="message-text"></p>
+    </div>
+    <div id="verb-bar">
+      <button class="verb-btn active" data-verb="walk" title="Walk">🚶</button>
+      <button class="verb-btn" data-verb="look" title="Look">👁️</button>
+      <button class="verb-btn" data-verb="take" title="Take">✋</button>
+      <button class="verb-btn" data-verb="use" title="Use">🔧</button>
+      <button class="verb-btn" data-verb="talk" title="Talk">💬</button>
+      <button class="verb-btn" id="btn-inv" title="Inventory">🎒</button>
+    </div>
+  </div>
+
+  <!-- Inventory Panel -->
+  <div id="inventory-panel" class="overlay-panel hidden">
+    <h3>Inventory</h3>
+    <div id="inventory-grid"></div>
+    <button id="btn-close-inv" class="sierra-btn">Close</button>
+  </div>
+
+  <!-- Dialog Panel -->
+  <div id="dialog-panel" class="overlay-panel hidden">
+    <div id="dialog-portrait"></div>
+    <p id="dialog-speaker"></p>
+    <p id="dialog-text"></p>
+    <div id="dialog-choices"></div>
+  </div>
+
+  <!-- Game Menu -->
+  <div id="game-menu" class="overlay-panel hidden">
+    <h3>Game Menu</h3>
+    <button id="btn-save" class="sierra-btn">Save Game</button>
+    <button id="btn-load" class="sierra-btn">Load Game</button>
+    <button id="btn-restart" class="sierra-btn">Restart</button>
+    <button id="btn-quit" class="sierra-btn">Quit to Title</button>
+    <button id="btn-close-menu" class="sierra-btn">Resume</button>
+  </div>
+
+  <!-- Save/Load Panel -->
+  <div id="save-load-panel" class="overlay-panel hidden">
+    <h3 id="save-load-title">Save Game</h3>
+    <div id="save-slots"></div>
+    <button id="btn-cancel-save" class="sierra-btn">Cancel</button>
+  </div>
+
+  <!-- Death Screen -->
+  <div id="death-screen" class="overlay-panel hidden">
+    <h3 id="death-title">Oh Dear!</h3>
+    <p id="death-message"></p>
+    <button id="btn-restore" class="sierra-btn">Restore</button>
+    <button id="btn-restart-death" class="sierra-btn">Restart</button>
+  </div>
+
+  <!-- Victory Screen -->
+  <div id="victory-screen" class="overlay-panel hidden">
+    <h3>Congratulations!</h3>
+    <p id="victory-message"></p>
+    <p id="victory-score"></p>
+    <button id="btn-play-again" class="sierra-btn">Play Again</button>
+  </div>
+
+  <script src="js/graphics.js"></script>
+  <script src="js/engine.js"></script>
+  <script src="js/world.js"></script>
+  <script src="js/account.js"></script>
+  <script src="js/app.js"></script>
+</body>
+</html>
