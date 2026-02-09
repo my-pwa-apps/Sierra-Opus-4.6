@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-  <meta name="theme-color" content="#000000">
+  <meta name="theme-color" content="#003366">
   <meta name="description" content="King's Quest: The Enchanted Isle - A Sierra On-Line style adventure game">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black">
@@ -14,6 +14,9 @@
   <link rel="stylesheet" href="css/style.css">
 </head>
 <body>
+  <noscript>
+    <p style="color:#DAA520;text-align:center;padding:2em;font-family:monospace;">JavaScript is required to play King's Quest: The Enchanted Isle.</p>
+  </noscript>
   <!-- Name Screen -->
   <div id="login-screen" class="screen active">
     <div class="login-container">
@@ -24,7 +27,8 @@
       <h2 class="game-subtitle">The Enchanted Isle</h2>
       <p class="credits">An Original Adventure by Sierra On-Line</p>
       <div class="login-form">
-        <input type="text" id="username" placeholder="Enter Your Name" maxlength="20" autocomplete="username">
+        <label for="username" class="hidden">Your Name</label>
+        <input type="text" id="username" placeholder="Enter Your Name" maxlength="20" autocomplete="username" aria-label="Enter your adventurer name">
         <button id="btn-play" class="sierra-btn">Play</button>
         <p id="login-message" class="login-msg"></p>
       </div>
@@ -50,7 +54,7 @@
     <div id="score-bar">
       <span id="scene-name"></span>
       <span id="score-display">Score: 0 of 145</span>
-      <button id="btn-menu" class="icon-btn" title="Menu">☰</button>
+      <button id="btn-menu" class="icon-btn" title="Menu" aria-label="Open game menu">☰</button>
     </div>
     <div id="canvas-wrapper">
       <canvas id="game-canvas" width="320" height="170"></canvas>

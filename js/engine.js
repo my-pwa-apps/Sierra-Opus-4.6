@@ -109,8 +109,6 @@ class GameEngine {
         try {
           this.audioCtx = new (window.AudioContext || window.webkitAudioContext)();
         } catch(e) { /* audio not available */ }
-        document.removeEventListener('click', initAudio);
-        document.removeEventListener('touchend', initAudio);
       };
       document.addEventListener('click', initAudio, { once: true });
       document.addEventListener('touchend', initAudio, { once: true });
@@ -782,13 +780,15 @@ class GameEngine {
       this.player.targetY = step.moveTo.y;
       this.player.walking = true;
       this.player.exitTarget = null;
-      // Wait for movement to complete
-      const checkArrival = setInterval(() => {
+      // Poll for arrival (use requestAnimationFrame for efficiency)
+      const checkArrival = () => {
         if (!this.player.walking) {
-          clearInterval(checkArrival);
           this.nextCutsceneStep();
+        } else {
+          requestAnimationFrame(checkArrival);
         }
-      }, 50);
+      };
+      requestAnimationFrame(checkArrival);
     }
   }
 
@@ -1040,12 +1040,22 @@ class GameEngine {
 
   // ── Overlays ──
   hideAllOverlays() {
-    ['inventory-panel','dialog-panel','game-menu','save-load-panel','death-screen','victory-screen']
-      .forEach(id => document.getElementById(id).classList.add('hidden'));
+    const panels = [
+      this._dom.inventoryPanel,
+      this._dom.dialogPanel,
+      this._dom.gameMenu,
+      this._dom.saveLoadPanel,
+      this._dom.deathScreen,
+      this._dom.victoryScreen,
+    ];
+    for (const panel of panels) {
+      if (panel) panel.classList.add('hidden');
+    }
   }
 
   hideOverlay(id) {
-    document.getElementById(id).classList.add('hidden');
+    const el = document.getElementById(id);
+    if (el) el.classList.add('hidden');
   }
 
   toggleMenu() {
@@ -1109,6 +1119,11 @@ class GameEngine {
       gain.connect(this.audioCtx.destination);
       osc.start(this.audioCtx.currentTime + delay);
       osc.stop(this.audioCtx.currentTime + delay + dur + 0.05);
+      // Clean up nodes after playback to prevent memory leaks
+      osc.onended = () => {
+        osc.disconnect();
+        gain.disconnect();
+      };
     } catch(e) { /* ignore audio errors */ }
   }
 
@@ -1197,19 +1212,35 @@ class GameEngine {
       this.currentScene.draw(ctx, this);
     }
 
-    // Draw NPCs
+    // Draw NPCs (with Sierra-style depth scaling)
     if (this.currentScene.npcs) {
       for (const npc of this.currentScene.npcs) {
         if (npc.hidden) continue;
-        if (npc.draw) npc.draw(ctx, this);
+        if (npc.draw) {
+          const ns = GFX.depthScale(npc.y);
+          ctx.save();
+          ctx.translate(npc.x, npc.y);
+          ctx.scale(ns, ns);
+          ctx.translate(-npc.x, -npc.y);
+          npc.draw(ctx, this);
+          ctx.restore();
+        }
       }
     }
 
-    // Draw player
+    // Draw player (with Sierra-style depth scaling)
     if (this.player.visible) {
-      GFX.drawGraham(ctx, Math.round(this.player.x), Math.round(this.player.y),
+      const px = Math.round(this.player.x);
+      const py = Math.round(this.player.y);
+      const ps = GFX.depthScale(py);
+      ctx.save();
+      ctx.translate(px, py);
+      ctx.scale(ps, ps);
+      ctx.translate(-px, -py);
+      GFX.drawGraham(ctx, px, py,
         this.player.direction, this.player.walking ? this.player.frame : -1,
         this.player.actionAnim);
+      ctx.restore();
     }
 
     // Draw action animation effects

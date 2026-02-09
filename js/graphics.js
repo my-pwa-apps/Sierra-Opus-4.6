@@ -423,16 +423,18 @@ const GFX = {
   drawSparkle(ctx, x, y, phase, color) {
     const a = Math.sin(phase) * 0.5 + 0.5;
     if (a < 0.2) return;
-    ctx.globalAlpha = a;
+    const prevAlpha = ctx.globalAlpha;
+    ctx.globalAlpha = a * prevAlpha;
     ctx.fillStyle = color || '#FFFFFF';
     this.rect(ctx, x, y, 1, 1);
     this.rect(ctx, x-1, y, 3, 1);
     this.rect(ctx, x, y-1, 1, 3);
-    ctx.globalAlpha = 1.0;
+    ctx.globalAlpha = prevAlpha;
   },
 
   // ── Crystal ──
   drawCrystal(ctx, x, y, h, color) {
+    const prevAlpha = ctx.globalAlpha;
     ctx.fillStyle = color;
     ctx.beginPath();
     ctx.moveTo(x, y);
@@ -443,7 +445,7 @@ const GFX = {
     ctx.closePath();
     ctx.fill();
     // Highlight
-    ctx.globalAlpha = 0.27;
+    ctx.globalAlpha = 0.27 * prevAlpha;
     ctx.fillStyle = '#FFFFFF';
     ctx.beginPath();
     ctx.moveTo(x - h*0.1, y - h*0.3);
@@ -451,7 +453,7 @@ const GFX = {
     ctx.lineTo(x + h*0.05, y - h*0.3);
     ctx.closePath();
     ctx.fill();
-    ctx.globalAlpha = 1.0;
+    ctx.globalAlpha = prevAlpha;
   },
 
   // ── Cauldron / Cooking Pot ──
@@ -464,7 +466,8 @@ const GFX = {
     this.rect(ctx, x - 10, y - 3, 20, 3, c.DKGRAY);
     // Steam (animated)
     const p = phase || 0;
-    ctx.fillStyle = 'rgba(255,255,255,0.25)';
+    const prevAlpha = ctx.globalAlpha;
+    ctx.fillStyle = `rgba(255,255,255,${0.25 * prevAlpha})`;
     for (let i = 0; i < 3; i++) {
       const drift = Math.sin(p * 2 + i * 1.5) * 2;
       const rise = Math.sin(p * 1.5 + i) * 1;
@@ -539,6 +542,115 @@ const GFX = {
   seededRandom(seed) {
     const x = Math.sin(seed * 12.9898 + 78.233) * 43758.5453;
     return x - Math.floor(x);
+  },
+
+  // ── Sierra Pseudo-3D Perspective ──
+
+  // Depth scale factor based on Y position (higher = farther = smaller)
+  depthScale(y) {
+    const t = Math.max(0, Math.min(1, (y - 60) / (170 - 60)));
+    return 0.55 + t * 0.45;
+  },
+
+  // Draw perspective side walls for indoor rooms (triangular depth panels)
+  drawPerspectiveSideWalls(ctx, w, h, horizonY, wallColorHex) {
+    const inset = 25;
+    const rgb = this.hexToRgb(wallColorHex);
+    // Left side wall (darker shade)
+    ctx.fillStyle = `rgb(${Math.max(0,rgb.r-35)},${Math.max(0,rgb.g-35)},${Math.max(0,rgb.b-25)})`;
+    ctx.beginPath();
+    ctx.moveTo(0, horizonY);
+    ctx.lineTo(inset, horizonY);
+    ctx.lineTo(0, h);
+    ctx.closePath();
+    ctx.fill();
+    // Stone courses on left wall
+    ctx.strokeStyle = `rgba(${Math.min(255,rgb.r+10)},${Math.min(255,rgb.g+10)},${Math.min(255,rgb.b+10)},0.25)`;
+    ctx.lineWidth = 0.5;
+    for (let row = horizonY + 6; row < h - 2; row += 8) {
+      const t = (row - horizonY) / (h - horizonY);
+      const wallW = inset * (1 - t);
+      if (wallW > 3) {
+        ctx.beginPath();
+        ctx.moveTo(0, row);
+        ctx.lineTo(wallW, row);
+        ctx.stroke();
+      }
+    }
+    // Right side wall (slightly lighter shade)
+    ctx.fillStyle = `rgb(${Math.max(0,rgb.r-28)},${Math.max(0,rgb.g-28)},${Math.max(0,rgb.b-18)})`;
+    ctx.beginPath();
+    ctx.moveTo(w, horizonY);
+    ctx.lineTo(w - inset, horizonY);
+    ctx.lineTo(w, h);
+    ctx.closePath();
+    ctx.fill();
+    for (let row = horizonY + 6; row < h - 2; row += 8) {
+      const t = (row - horizonY) / (h - horizonY);
+      const wallW = inset * (1 - t);
+      if (wallW > 3) {
+        ctx.beginPath();
+        ctx.moveTo(w, row);
+        ctx.lineTo(w - wallW, row);
+        ctx.stroke();
+      }
+    }
+    // Edge lines (wall-floor seam)
+    ctx.strokeStyle = 'rgba(0,0,0,0.4)';
+    ctx.lineWidth = 1;
+    ctx.beginPath();
+    ctx.moveTo(inset, horizonY);
+    ctx.lineTo(0, h);
+    ctx.stroke();
+    ctx.beginPath();
+    ctx.moveTo(w - inset, horizonY);
+    ctx.lineTo(w, h);
+    ctx.stroke();
+    // Horizon accent line
+    ctx.strokeStyle = 'rgba(0,0,0,0.2)';
+    ctx.beginPath();
+    ctx.moveTo(inset, horizonY);
+    ctx.lineTo(w - inset, horizonY);
+    ctx.stroke();
+  },
+
+  // Draw perspective floor grid lines (converge to vanishing point)
+  drawPerspectiveFloorGrid(ctx, w, h, horizonY, lineColor) {
+    const inset = 25;
+    ctx.strokeStyle = lineColor || 'rgba(0,0,0,0.08)';
+    ctx.lineWidth = 0.5;
+    // Horizontal depth lines (closer together near horizon)
+    for (let i = 1; i <= 6; i++) {
+      const t = Math.pow(i / 6, 1.8);
+      const y = horizonY + t * (h - horizonY);
+      const squeeze = 1 - t;
+      const leftX = inset * squeeze;
+      const rightX = w - inset * squeeze;
+      ctx.beginPath();
+      ctx.moveTo(leftX, y);
+      ctx.lineTo(rightX, y);
+      ctx.stroke();
+    }
+    // Vertical converging lines
+    for (let i = 1; i <= 5; i++) {
+      const t = i / 6;
+      const topX = inset + t * (w - 2 * inset);
+      const bottomX = t * w;
+      ctx.beginPath();
+      ctx.moveTo(topX, horizonY);
+      ctx.lineTo(bottomX, h);
+      ctx.stroke();
+    }
+  },
+
+  // Draw perspective ground overlay for outdoor scenes (atmospheric depth)
+  drawPerspectiveGroundOverlay(ctx, x, y, w, h) {
+    const grad = ctx.createLinearGradient(0, y, 0, y + h);
+    grad.addColorStop(0, 'rgba(0,0,30,0.18)');
+    grad.addColorStop(0.5, 'rgba(0,0,10,0.06)');
+    grad.addColorStop(1, 'rgba(0,0,0,0)');
+    ctx.fillStyle = grad;
+    ctx.fillRect(x, y, w, h);
   },
 
   // ── Graham Character Sprite ──
@@ -892,12 +1004,13 @@ const GFX = {
     this.rect(ctx, 8, -30, 2, 22, c.BROWN);
     // Crystal on staff
     const glow = Math.sin(phase * 3) * 0.3 + 0.7;
-    ctx.globalAlpha = glow;
+    const prevGlowAlpha = ctx.globalAlpha;
+    ctx.globalAlpha = glow * prevGlowAlpha;
     ctx.fillStyle = '#88DDFF';
     ctx.beginPath();
     ctx.arc(9, -32, 3, 0, Math.PI*2);
     ctx.fill();
-    ctx.globalAlpha = 1;
+    ctx.globalAlpha = prevGlowAlpha;
     // Head
     this.rect(ctx, -3, -24, 6, 6, c.SKIN);
     // Face

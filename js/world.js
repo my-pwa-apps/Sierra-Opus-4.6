@@ -21,6 +21,9 @@
       GFX.drawStoneFloor(ctx, 0, 100, w, h - 100);
       // Back wall
       GFX.drawStoneWall(ctx, 0, 0, w, 100);
+      // Perspective side walls & floor grid
+      GFX.drawPerspectiveSideWalls(ctx, w, h, 100, C.DKSTONE);
+      GFX.drawPerspectiveFloorGrid(ctx, w, h, 100);
       // Red carpet
       GFX.rect(ctx, 140, 100, 40, 70, C.DKRED);
       GFX.rect(ctx, 142, 100, 36, 70, C.RED);
@@ -34,8 +37,10 @@
       // Torches
       GFX.drawTorch(ctx, 80, 30, eng.waterPhase);
       GFX.drawTorch(ctx, 230, 30, eng.waterPhase + 1);
-      // Throne
-      GFX.drawThrone(ctx, 148, 55);
+      // King's Throne (left)
+      GFX.drawThrone(ctx, 134, 55);
+      // Queen's Throne (right)
+      GFX.drawThrone(ctx, 162, 55);
       // Tapestries
       GFX.rect(ctx, 110, 15, 16, 40, C.DKRED);
       GFX.rect(ctx, 112, 17, 12, 36, C.RED);
@@ -73,9 +78,15 @@
 
     hotspots: [
       {
-        name: 'throne', x: 148, y: 55, w: 24, h: 40,
-        onLook(eng) { eng.showMessage('The magnificent throne of Daventry. It\'s been in the family for generations. Currently smells faintly of pudding.'); },
-        onTake(eng) { eng.showMessage('You can\'t take the throne! ...Well, technically you already have it, being king and all.'); }
+        name: 'King\'s throne', x: 134, y: 55, w: 24, h: 40,
+        onLook(eng) { eng.showMessage('King Graham\'s throne, the seat of Daventry\'s ruler. Slightly worn from years of heroic sitting. Has a faint scratch from when Graham tried to polish it with his sword.'); },
+        onTake(eng) { eng.showMessage('You\'re already the king! You can\'t exactly take your own throne with you.'); },
+        onUse(eng) { eng.showMessage('You sit on your throne briefly. Ah, the responsibilities of kinghood. No time for sitting — there\'s chaos to fix!'); }
+      },
+      {
+        name: 'Queen\'s throne', x: 162, y: 55, w: 24, h: 40,
+        onLook(eng) { eng.showMessage('Queen Valanice\'s throne. Equally magnificent, with a slightly more comfortable cushion. The Queen has good taste.'); },
+        onTake(eng) { eng.showMessage('That\'s Valanice\'s throne! She would NOT appreciate you hauling it off.'); }
       },
       {
         name: 'treasure chest', x: 242, y: 85, w: 20, h: 15,
@@ -114,8 +125,8 @@
 
     npcs: [
       {
-        name: 'Queen Valanice', x: 160, y: 92, w: 16, h: 30, hidden: false,
-        draw(ctx, eng) { GFX.drawValanice(ctx, 160, 92, eng.waterPhase); },
+        name: 'Queen Valanice', x: 174, y: 92, w: 16, h: 30, hidden: false,
+        draw(ctx, eng) { GFX.drawValanice(ctx, 174, 92, eng.waterPhase); },
         onLook(eng) { eng.showMessage('Your beloved wife, Queen Valanice. She looks worried about the state of the kingdom.'); },
         onTalk(eng) {
           if (!eng.getFlag('talked_valanice')) {
@@ -163,6 +174,7 @@
       GFX.drawCastleWall(ctx, 0, 30, w, 30);
       // Ground
       GFX.drawGrass(ctx, 0, 60, w, h - 60, C.GRASSGREEN, C.GREEN);
+      GFX.drawPerspectiveGroundOverlay(ctx, 0, 60, w, h - 60);
       // Path
       GFX.drawDirt(ctx, 130, 60, 60, h - 60);
       // Garden (growing upside-down!)
@@ -244,6 +256,9 @@
       GFX.drawStoneFloor(ctx, 0, 100, w, h - 100);
       // Walls
       GFX.drawStoneWall(ctx, 0, 0, w, 100);
+      // Perspective side walls & floor grid
+      GFX.drawPerspectiveSideWalls(ctx, w, h, 100, C.DKSTONE);
+      GFX.drawPerspectiveFloorGrid(ctx, w, h, 100);
       // Fireplace
       GFX.drawFireplace(ctx, 20, 40, 40, 35, true, eng.waterPhase);
       // Table
@@ -379,6 +394,7 @@
       GFX.rect(ctx, 0, 118, w, 6, C.DKBROWN);
       GFX.rect(ctx, 0, 118, w, 3, C.BROWN);
       GFX.drawDirt(ctx, 0, 124, w, h - 124);
+      GFX.drawPerspectiveGroundOverlay(ctx, 0, 118, w, h - 118);
       // Dock posts
       for (let px = 20; px < w; px += 40) {
         GFX.rect(ctx, px, 108, 4, 16, C.DKBROWN);
@@ -533,6 +549,7 @@
         const sy = 88 + GFX.seededRandom(i*13) * (h - 98);
         GFX.pixel(ctx, sx, sy, C.TAN);
       }
+      GFX.drawPerspectiveGroundOverlay(ctx, 0, 88, w, h - 88);
       // Surf line
       const surf = Math.sin(eng.waterPhase * 2) * 3;
       GFX.rect(ctx, 0, 86 + surf, w, 4, C.WHITE);
@@ -656,6 +673,7 @@
       }
       // Ground
       GFX.drawGrass(ctx, 0, 90, w, h - 90, C.DKGREEN, '#2A5A2A');
+      GFX.drawPerspectiveGroundOverlay(ctx, 0, 90, w, h - 90);
       // Dirt path
       GFX.drawDirt(ctx, 130, 90, 60, h - 90);
       // Foreground trees
@@ -872,6 +890,7 @@
       }
       // Ground - magical grass
       GFX.drawGrass(ctx, 0, 80, w, h - 80, '#336644', '#448855');
+      GFX.drawPerspectiveGroundOverlay(ctx, 0, 80, w, h - 80);
       // Giant mushrooms!
       GFX.drawMushroom(ctx, 60, 110, 25, '#CC44AA');
       GFX.drawMushroom(ctx, 250, 105, 20, '#AA33CC');
@@ -1093,6 +1112,7 @@
       GFX.drawDoor(ctx, 150, 105, 20, 30);
       // Ground
       GFX.drawGrass(ctx, 0, 100, w, h - 100, C.DKGREEN, '#335533');
+      GFX.drawPerspectiveGroundOverlay(ctx, 0, 100, w, h - 100);
       GFX.drawDirt(ctx, 130, 100, 60, h - 100);
       // Garden gnome
       GFX.rect(ctx, 105, 123, 6, 10, C.RED); // hat
@@ -1233,6 +1253,9 @@
       GFX.drawStoneWall(ctx, 0, 0, w, 100);
       // Floor
       GFX.drawStoneFloor(ctx, 0, 100, w, h-100);
+      // Perspective side walls & floor grid
+      GFX.drawPerspectiveSideWalls(ctx, w, h, 100, C.DKSTONE);
+      GFX.drawPerspectiveFloorGrid(ctx, w, h, 100);
       // Circular room feel
       ctx.globalAlpha = 0.13;
       ctx.fillStyle = '#4444CC';
@@ -1435,6 +1458,9 @@
       // Floor
       GFX.rect(ctx, 0, 100, w, h - 100, '#15152a');
       GFX.rect(ctx, 0, 100, w, 3, '#1a1a30');
+      // Perspective side walls & floor grid
+      GFX.drawPerspectiveSideWalls(ctx, w, h, 100, '#1a1a2a');
+      GFX.drawPerspectiveFloorGrid(ctx, w, h, 100, 'rgba(100,100,200,0.06)');
       // Glowing crystals (decoration)
       ctx.globalAlpha = 0.33;
       GFX.drawCrystal(ctx, 30, 100, 20, '#5555FF');
@@ -1608,7 +1634,7 @@
   //  SCENE LOOK DESCRIPTIONS
   // ═══════════════════════════════════
   const sceneDescriptions = {
-    throneRoom: 'The grand throne room of Castle Daventry. Stone walls adorned with tapestries, torches flickering warmly. The magnificent throne dominates the far wall, and a treasure chest sits in the corner.',
+    throneRoom: 'The grand throne room of Castle Daventry. Stone walls adorned with tapestries, torches flickering warmly. Two magnificent thrones — one for the King, one for the Queen — dominate the far wall, and a treasure chest sits in the corner.',
     courtyard: 'The castle courtyard — in magical disarray. The moat has turned to butterscotch pudding, flowers grow upside-down, and the air smells strangely of cinnamon. Doors lead to the castle and kitchen, and a gate opens south to the docks.',
     kitchen: 'Chef Pierre\'s domain. A roaring fireplace heats the room, shelves of exotic spices line the walls, and something bubbles suspiciously in the cauldron. The aroma is excellent, magic or no magic.',
     docks: 'The Royal Docks of Daventry. Seagulls wheel overhead while the sea stretches to the horizon. A mysterious island shimmers with purple light in the distance. Boats bob along the wooden pier.',

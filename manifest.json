@@ -1,23 +1,40 @@
 {
-  "name": "Kings Quest: The Enchanted Isle",
+  "name": "King's Quest: The Enchanted Isle",
   "short_name": "KQ Enchanted Isle",
+  "id": "kq-enchanted-isle",
   "description": "A Sierra On-Line style adventure game featuring King Graham in a brand new quest!",
   "start_url": "./index.html",
+  "scope": "./",
   "display": "standalone",
   "orientation": "any",
   "background_color": "#000000",
-  "theme_color": "#000000",
+  "theme_color": "#003366",
   "categories": ["games", "entertainment"],
   "icons": [
     {
-      "src": "data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 192 192'><rect fill='%23003366' width='192' height='192'/><text x='96' y='120' text-anchor='middle' font-size='100'>👑</text></svg>",
+      "src": "data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 192 192'><rect fill='%23003366' width='192' height='192' rx='24'/><text x='96' y='120' text-anchor='middle' font-size='100'>👑</text></svg>",
       "sizes": "192x192",
-      "type": "image/svg+xml"
+      "type": "image/svg+xml",
+      "purpose": "any"
+    },
+    {
+      "src": "data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 512 512'><rect fill='%23003366' width='512' height='512' rx='64'/><text x='256' y='320' text-anchor='middle' font-size='260'>👑</text></svg>",
+      "sizes": "512x512",
+      "type": "image/svg+xml",
+      "purpose": "any"
     },
     {
       "src": "data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 512 512'><rect fill='%23003366' width='512' height='512'/><text x='256' y='320' text-anchor='middle' font-size='260'>👑</text></svg>",
       "sizes": "512x512",
-      "type": "image/svg+xml"
+      "type": "image/svg+xml",
+      "purpose": "maskable"
+    }
+  ],
+  "shortcuts": [
+    {
+      "name": "New Game",
+      "url": "./index.html#new",
+      "description": "Start a new adventure"
     }
   ]
 }

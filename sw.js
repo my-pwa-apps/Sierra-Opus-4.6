@@ -1,5 +1,9 @@
-// Service Worker for King's Quest: The Enchanted Isle
-const CACHE_NAME = 'kq-enchanted-isle-v7';
+/* ============================================
+   King's Quest: The Enchanted Isle
+   Service Worker - Offline PWA support
+   ============================================ */
+
+const CACHE_NAME = 'kq-enchanted-isle-v8';
 const ASSETS = [
   './',
   './index.html',
@@ -9,36 +13,56 @@ const ASSETS = [
   './js/world.js',
   './js/account.js',
   './js/app.js',
-  './manifest.json'
+  './manifest.json',
 ];
 
-self.addEventListener('install', e => {
+// Install: pre-cache all static assets
+self.addEventListener('install', (e) => {
   e.waitUntil(
-    caches.open(CACHE_NAME).then(cache => cache.addAll(ASSETS))
+    caches.open(CACHE_NAME)
+      .then((cache) => cache.addAll(ASSETS))
+      .then(() => self.skipWaiting())
   );
-  self.skipWaiting();
 });
 
-self.addEventListener('activate', e => {
+// Activate: purge old caches
+self.addEventListener('activate', (e) => {
   e.waitUntil(
-    caches.keys().then(keys =>
-      Promise.all(keys.filter(k => k !== CACHE_NAME).map(k => caches.delete(k)))
-    )
+    caches.keys()
+      .then((keys) => Promise.all(
+        keys.filter((k) => k !== CACHE_NAME).map((k) => caches.delete(k))
+      ))
+      .then(() => self.clients.claim())
   );
-  self.clients.claim();
 });
 
-self.addEventListener('fetch', e => {
+// Fetch: stale-while-revalidate for navigation/app assets,
+// cache-first for everything else
+self.addEventListener('fetch', (e) => {
+  const { request } = e;
+
+  // Only handle GET requests
+  if (request.method !== 'GET') return;
+
+  // Skip cross-origin requests (e.g. Google Fonts)
+  if (!request.url.startsWith(self.location.origin)) {
+    e.respondWith(fetch(request).catch(() => caches.match(request)));
+    return;
+  }
+
   e.respondWith(
-    caches.match(e.request).then(cached => {
-      if (cached) return cached;
-      return fetch(e.request).then(response => {
-        if (response.status === 200 && response.type === 'basic') {
+    caches.match(request).then((cached) => {
+      // Background revalidation: update the cache for next load
+      const networkFetch = fetch(request).then((response) => {
+        if (response && response.ok && response.type === 'basic') {
           const clone = response.clone();
-          caches.open(CACHE_NAME).then(cache => cache.put(e.request, clone));
+          caches.open(CACHE_NAME).then((cache) => cache.put(request, clone));
         }
         return response;
-      });
-    }).catch(() => caches.match('./index.html'))
+      }).catch(() => null);
+
+      // Return cached immediately if available, otherwise wait for network
+      return cached || networkFetch || caches.match('./index.html');
+    })
   );
 });
