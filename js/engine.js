@@ -530,6 +530,7 @@ class GameEngine {
     const py = Math.round(this.player.y);
     const t = anim.timer / anim.duration;
     const alpha = t < 0.3 ? t / 0.3 : t > 0.7 ? (1 - t) / 0.3 : 1;
+    const _prevAlpha = ctx.globalAlpha;
 
     switch(anim.type) {
       case 'look': {
@@ -538,7 +539,7 @@ class GameEngine {
         ctx.fillStyle = '#FFFF88';
         ctx.fillRect(px - 1, py - 30, 3, 3);
         ctx.fillRect(px, py - 27, 1, 2);
-        ctx.globalAlpha = 1.0;
+        ctx.globalAlpha = _prevAlpha;
         break;
       }
       case 'take': {
@@ -558,7 +559,7 @@ class GameEngine {
           ctx.fillRect(handX + dir * 2 - 1, handY, 3, 1);
           ctx.fillRect(handX + dir * 2, handY + 1, 1, 1);
         }
-        ctx.globalAlpha = 1.0;
+        ctx.globalAlpha = _prevAlpha;
         break;
       }
       case 'use': {
@@ -579,7 +580,7 @@ class GameEngine {
           ctx.fillRect(Math.round(sx) - 1, Math.round(sy), 3, 1);
           ctx.fillRect(Math.round(sx), Math.round(sy) - 1, 1, 3);
         }
-        ctx.globalAlpha = 1.0;
+        ctx.globalAlpha = _prevAlpha;
         break;
       }
       case 'talk': {
@@ -595,7 +596,7 @@ class GameEngine {
             ctx.fillRect(bx + i * 3, by - bounce, 2, 2);
           }
         }
-        ctx.globalAlpha = 1.0;
+        ctx.globalAlpha = _prevAlpha;
         break;
       }
     }

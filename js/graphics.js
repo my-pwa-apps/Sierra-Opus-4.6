@@ -24,7 +24,7 @@ const GFX = {
     DKGRAY: '#444444',
     GRAY: '#888888',
     LTGRAY: '#BBBBBB',
-    WHITE: '#EEEEEE',
+    WHITE: '#F5F5F5',
     RED: '#CC3333',
     DKRED: '#882222',
     ORANGE: '#DD8833',
@@ -51,6 +51,41 @@ const GFX = {
   pixel(ctx, x, y, color) {
     ctx.fillStyle = color;
     ctx.fillRect(Math.floor(x), Math.floor(y), 1, 1);
+  },
+
+  // Alpha-safe helper: runs fn at the given alpha, then restores previous
+  withAlpha(ctx, alpha, fn) {
+    const prev = ctx.globalAlpha;
+    ctx.globalAlpha = alpha;
+    fn();
+    ctx.globalAlpha = prev;
+  },
+
+  // ── Shared Starfield ──
+  drawStarfield(ctx, w, h, phase, opts) {
+    opts = opts || {};
+    const count = opts.count || 40;
+    const yFrac = opts.yFrac || 0.4;
+    const scroll = opts.scroll || false;
+    const prev = ctx.globalAlpha;
+    for (let i = 0; i < count; i++) {
+      if (scroll) {
+        const speed = this.seededRandom(i * 3) * 2 + 0.5;
+        const sx = (this.seededRandom(i * 7) * w + phase * speed * 30) % w;
+        const sy = this.seededRandom(i * 13) * h * yFrac;
+        const bright = this.seededRandom(i * 17) * 0.6 + 0.4;
+        const twinkle = Math.sin(phase * 2 + i) * 0.2 + 0.8;
+        ctx.globalAlpha = bright * twinkle * prev;
+        this.rect(ctx, sx, sy, speed > 1.5 ? 2 : 1, 1, this.C.WHITE);
+      } else {
+        const sx = this.seededRandom(i * 7) * w;
+        const sy = this.seededRandom(i * 13) * h * yFrac;
+        const twinkle = Math.sin(phase * 2 + i) * 0.3 + 0.7;
+        ctx.globalAlpha = twinkle * prev;
+        this.pixel(ctx, sx, sy, this.C.WHITE);
+      }
+    }
+    ctx.globalAlpha = prev;
   },
 
   // ── Sky Gradient ──
@@ -646,8 +681,8 @@ const GFX = {
   // Draw perspective ground overlay for outdoor scenes (atmospheric depth)
   drawPerspectiveGroundOverlay(ctx, x, y, w, h) {
     const grad = ctx.createLinearGradient(0, y, 0, y + h);
-    grad.addColorStop(0, 'rgba(0,0,30,0.18)');
-    grad.addColorStop(0.5, 'rgba(0,0,10,0.06)');
+    grad.addColorStop(0, 'rgba(0,0,30,0.08)');
+    grad.addColorStop(0.5, 'rgba(0,0,10,0.02)');
     grad.addColorStop(1, 'rgba(0,0,0,0)');
     ctx.fillStyle = grad;
     ctx.fillRect(x, y, w, h);
@@ -1067,14 +1102,7 @@ const GFX = {
     this.drawSky(ctx, w, h * 0.6, '#001133', '#224488');
 
     // Stars
-    for (let i = 0; i < 40; i++) {
-      const sx = this.seededRandom(i * 7) * w;
-      const sy = this.seededRandom(i * 13) * h * 0.4;
-      const twinkle = Math.sin(phase * 2 + i) * 0.3 + 0.7;
-      ctx.globalAlpha = twinkle;
-      this.pixel(ctx, sx, sy, c.WHITE);
-      ctx.globalAlpha = 1;
-    }
+    this.drawStarfield(ctx, w, h, phase, { count: 40, yFrac: 0.4 });
 
     // Mountains
     this.drawMountain(ctx, -20, h*0.35, w*0.4, h*0.3, '#112244', c.WHITE);
@@ -1202,14 +1230,7 @@ const GFX = {
     this.drawSky(ctx, w, h, '#110022', '#330044');
 
     // Stars
-    for (let i = 0; i < 25; i++) {
-      const sx = this.seededRandom(i * 7) * w;
-      const sy = this.seededRandom(i * 13) * h * 0.3;
-      const twinkle = Math.sin(phase * 2 + i) * 0.3 + 0.7;
-      ctx.globalAlpha = twinkle;
-      this.pixel(ctx, sx, sy, c.WHITE);
-      ctx.globalAlpha = 1;
-    }
+    this.drawStarfield(ctx, w, h, phase, { count: 25, yFrac: 0.3 });
 
     // City skyline
     const buildings = [
@@ -1232,9 +1253,9 @@ const GFX = {
           const lit = this.seededRandom(wx * 7 + wy * 13) > 0.4;
           if (lit) {
             const flicker = Math.sin(phase + wx + wy) * 0.15 + 0.85;
-            ctx.globalAlpha = flicker;
-            this.rect(ctx, wx, wy, 4, 5, '#FFCC44');
-            ctx.globalAlpha = 1;
+            this.withAlpha(ctx, flicker, () => {
+              this.rect(ctx, wx, wy, 4, 5, '#FFCC44');
+            });
           }
         }
       }
@@ -1242,10 +1263,10 @@ const GFX = {
 
     // Neon signs
     const neonGlow = Math.sin(phase * 3) * 0.3 + 0.7;
-    ctx.globalAlpha = neonGlow;
-    this.rect(ctx, 170, h - 200, 30, 8, '#FF1493');
-    this.rect(ctx, 320, h - 130, 40, 8, '#00FFFF');
-    ctx.globalAlpha = 1;
+    this.withAlpha(ctx, neonGlow, () => {
+      this.rect(ctx, 170, h - 200, 30, 8, '#FF1493');
+      this.rect(ctx, 320, h - 130, 40, 8, '#00FFFF');
+    });
 
     // Street level
     this.rect(ctx, 0, h - 30, w, 30, '#111');
@@ -1255,14 +1276,15 @@ const GFX = {
     for (let lx = 50; lx < w; lx += 120) {
       this.rect(ctx, lx, h - 80, 2, 50, '#444');
       const glow = Math.sin(phase + lx) * 0.1 + 0.9;
-      ctx.globalAlpha = glow;
-      this.rect(ctx, lx - 4, h - 82, 10, 4, '#FFD700');
-      ctx.globalAlpha = 0.15;
-      ctx.fillStyle = '#FFD700';
-      ctx.beginPath();
-      ctx.arc(lx + 1, h - 45, 20, 0, Math.PI * 2);
-      ctx.fill();
-      ctx.globalAlpha = 1;
+      this.withAlpha(ctx, glow, () => {
+        this.rect(ctx, lx - 4, h - 82, 10, 4, '#FFD700');
+      });
+      this.withAlpha(ctx, 0.15, () => {
+        ctx.fillStyle = '#FFD700';
+        ctx.beginPath();
+        ctx.arc(lx + 1, h - 45, 20, 0, Math.PI * 2);
+        ctx.fill();
+      });
     }
   },
 
@@ -1477,27 +1499,17 @@ const GFX = {
     ctx.fillRect(0, 0, w, h);
 
     // Scrolling starfield
-    for (let i = 0; i < 80; i++) {
-      const speed = (this.seededRandom(i * 3) * 2 + 0.5);
-      const sx = (this.seededRandom(i * 7) * w + phase * speed * 30) % w;
-      const sy = this.seededRandom(i * 13) * h;
-      const bright = this.seededRandom(i * 17) * 0.6 + 0.4;
-      const twinkle = Math.sin(phase * 2 + i) * 0.2 + 0.8;
-      ctx.globalAlpha = bright * twinkle;
-      const size = speed > 1.5 ? 2 : 1;
-      this.rect(ctx, sx, sy, size, 1, c.WHITE);
-      ctx.globalAlpha = 1;
-    }
+    this.drawStarfield(ctx, w, h, phase, { count: 80, yFrac: 1.0, scroll: true });
 
     // Nebula
-    ctx.globalAlpha = 0.15;
-    const grad = ctx.createRadialGradient(w * 0.3, h * 0.4, 10, w * 0.3, h * 0.4, 120);
-    grad.addColorStop(0, '#4400FF');
-    grad.addColorStop(0.5, '#220066');
-    grad.addColorStop(1, 'transparent');
-    ctx.fillStyle = grad;
-    ctx.fillRect(0, 0, w, h);
-    ctx.globalAlpha = 1;
+    this.withAlpha(ctx, 0.15, () => {
+      const grad = ctx.createRadialGradient(w * 0.3, h * 0.4, 10, w * 0.3, h * 0.4, 120);
+      grad.addColorStop(0, '#4400FF');
+      grad.addColorStop(0.5, '#220066');
+      grad.addColorStop(1, 'transparent');
+      ctx.fillStyle = grad;
+      ctx.fillRect(0, 0, w, h);
+    });
 
     // Space station / ship
     const sx = w * 0.5, sy = h * 0.55;
@@ -1507,18 +1519,19 @@ const GFX = {
     // Bridge dome
     this.rect(ctx, sx - 10, sy - 15, 20, 10, '#334455');
     ctx.fillStyle = '#00CCFF';
-    ctx.globalAlpha = 0.6 + Math.sin(phase * 2) * 0.2;
-    ctx.fillRect(sx - 7, sy - 13, 14, 6);
-    ctx.globalAlpha = 1;
+    this.withAlpha(ctx, 0.6 + Math.sin(phase * 2) * 0.2, () => {
+      ctx.fillRect(sx - 7, sy - 13, 14, 6);
+    });
     // Engines
     const engineGlow = Math.sin(phase * 4) * 0.2 + 0.8;
-    ctx.globalAlpha = engineGlow;
-    this.rect(ctx, sx - 42, sy - 2, 4, 5, '#FF6600');
-    this.rect(ctx, sx + 38, sy - 2, 4, 5, '#FF6600');
-    ctx.globalAlpha = 0.3;
-    this.rect(ctx, sx - 48, sy - 1, 6, 3, '#FF3300');
-    this.rect(ctx, sx + 42, sy - 1, 6, 3, '#FF3300');
-    ctx.globalAlpha = 1;
+    this.withAlpha(ctx, engineGlow, () => {
+      this.rect(ctx, sx - 42, sy - 2, 4, 5, '#FF6600');
+      this.rect(ctx, sx + 38, sy - 2, 4, 5, '#FF6600');
+    });
+    this.withAlpha(ctx, 0.3, () => {
+      this.rect(ctx, sx - 48, sy - 1, 6, 3, '#FF3300');
+      this.rect(ctx, sx + 42, sy - 1, 6, 3, '#FF3300');
+    });
     // Wings
     this.rect(ctx, sx - 50, sy + 2, 15, 3, '#334455');
     this.rect(ctx, sx + 35, sy + 2, 15, 3, '#334455');
@@ -1768,34 +1781,35 @@ const GFX = {
     const flash = Math.sin(phase * 6) > 0;
     if (flash) {
       this.rect(ctx, carX + 22, h - 62, 6, 3, '#FF0000');
-      ctx.globalAlpha = 0.2;
-      ctx.fillStyle = '#FF0000';
-      ctx.beginPath();
-      ctx.arc(carX + 25, h - 60, 15, 0, Math.PI * 2);
-      ctx.fill();
-      ctx.globalAlpha = 1;
+      this.withAlpha(ctx, 0.2, () => {
+        ctx.fillStyle = '#FF0000';
+        ctx.beginPath();
+        ctx.arc(carX + 25, h - 60, 15, 0, Math.PI * 2);
+        ctx.fill();
+      });
     } else {
       this.rect(ctx, carX + 32, h - 62, 6, 3, '#0044FF');
-      ctx.globalAlpha = 0.2;
-      ctx.fillStyle = '#0044FF';
-      ctx.beginPath();
-      ctx.arc(carX + 35, h - 60, 15, 0, Math.PI * 2);
-      ctx.fill();
-      ctx.globalAlpha = 1;
+      this.withAlpha(ctx, 0.2, () => {
+        ctx.fillStyle = '#0044FF';
+        ctx.beginPath();
+        ctx.arc(carX + 35, h - 60, 15, 0, Math.PI * 2);
+        ctx.fill();
+      });
     }
 
     // Street lights
     for (let lx = 30; lx < w; lx += 150) {
       this.rect(ctx, lx, h - 90, 2, 50, '#555');
       this.rect(ctx, lx - 3, h - 92, 8, 3, '#666');
-      ctx.globalAlpha = 0.8;
-      this.rect(ctx, lx - 1, h - 94, 4, 2, '#FFD700');
-      ctx.globalAlpha = 0.1;
-      ctx.fillStyle = '#FFD700';
-      ctx.beginPath();
-      ctx.arc(lx + 1, h - 70, 20, 0, Math.PI * 2);
-      ctx.fill();
-      ctx.globalAlpha = 1;
+      this.withAlpha(ctx, 0.8, () => {
+        this.rect(ctx, lx - 1, h - 94, 4, 2, '#FFD700');
+      });
+      this.withAlpha(ctx, 0.1, () => {
+        ctx.fillStyle = '#FFD700';
+        ctx.beginPath();
+        ctx.arc(lx + 1, h - 70, 20, 0, Math.PI * 2);
+        ctx.fill();
+      });
     }
   },
 

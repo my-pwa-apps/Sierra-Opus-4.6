@@ -980,12 +980,12 @@
       const fairyBlessed = eng.getFlag('fairy_ring_visited');
       if (fairyBlessed) {
         // Soft golden glow under the ring after blessing
-        ctx.globalAlpha = 0.15 + Math.sin(eng.sparklePhase * 0.8) * 0.08;
-        ctx.fillStyle = '#FFEEAA';
-        ctx.beginPath();
-        ctx.ellipse(200, 137, 30, 14, 0, 0, Math.PI * 2);
-        ctx.fill();
-        ctx.globalAlpha = 1.0;
+        GFX.withAlpha(ctx, 0.15 + Math.sin(eng.sparklePhase * 0.8) * 0.08, () => {
+          ctx.fillStyle = '#FFEEAA';
+          ctx.beginPath();
+          ctx.ellipse(200, 137, 30, 14, 0, 0, Math.PI * 2);
+          ctx.fill();
+        });
       }
       for (let a = 0; a < 8; a++) {
         const angle = (a / 8) * Math.PI * 2;
@@ -1003,10 +1003,10 @@
         // Tiny fairy body
         GFX.rect(ctx, 200, 124 + fBob, 1, 3, '#FFE4B5');
         // Wings
-        ctx.globalAlpha = 0.5 + Math.sin(eng.sparklePhase * 2) * 0.3;
-        GFX.rect(ctx, 197, 123 + fBob, 3, 2, '#FFFFEE');
-        GFX.rect(ctx, 201, 123 + fBob, 3, 2, '#FFFFEE');
-        ctx.globalAlpha = 1.0;
+        GFX.withAlpha(ctx, 0.5 + Math.sin(eng.sparklePhase * 2) * 0.3, () => {
+          GFX.rect(ctx, 197, 123 + fBob, 3, 2, '#FFFFEE');
+          GFX.rect(ctx, 201, 123 + fBob, 3, 2, '#FFFFEE');
+        });
         // Fairy glow
         GFX.drawSparkle(ctx, 200, 123 + fBob, eng.sparklePhase * 2, '#FFFF88');
       }
@@ -1337,12 +1337,12 @@
       GFX.drawPerspectiveSideWalls(ctx, w, h, 100, C.DKSTONE);
       GFX.drawPerspectiveFloorGrid(ctx, w, h, 100);
       // Circular room feel
-      ctx.globalAlpha = 0.13;
-      ctx.fillStyle = '#4444CC';
-      ctx.beginPath();
-      ctx.arc(w/2, h/2, 80, 0, Math.PI*2);
-      ctx.fill();
-      ctx.globalAlpha = 1.0;
+      GFX.withAlpha(ctx, 0.13, () => {
+        ctx.fillStyle = '#4444CC';
+        ctx.beginPath();
+        ctx.arc(w/2, h/2, 80, 0, Math.PI*2);
+        ctx.fill();
+      });
       // Bookshelves
       GFX.drawBookshelf(ctx, 10, 20, 45, 55);
       GFX.drawBookshelf(ctx, 265, 20, 45, 55);
@@ -1353,12 +1353,12 @@
       ctx.beginPath();
       ctx.arc(72, 73, 6, 0, Math.PI*2);
       ctx.fill();
-      ctx.globalAlpha = 0.27;
-      ctx.fillStyle = '#AACCFF';
-      ctx.beginPath();
-      ctx.arc(70, 71, 2, 0, Math.PI*2);
-      ctx.fill();
-      ctx.globalAlpha = 1.0;
+      GFX.withAlpha(ctx, 0.27, () => {
+        ctx.fillStyle = '#AACCFF';
+        ctx.beginPath();
+        ctx.arc(70, 71, 2, 0, Math.PI*2);
+        ctx.fill();
+      });
       // Potion shelf
       GFX.rect(ctx, 230, 85, 30, 3, C.BROWN);
       // Potions
@@ -1553,13 +1553,13 @@
       GFX.drawPerspectiveSideWalls(ctx, w, h, 100, '#1a1a2a');
       GFX.drawPerspectiveFloorGrid(ctx, w, h, 100, 'rgba(100,100,200,0.06)');
       // Glowing crystals (decoration)
-      ctx.globalAlpha = 0.33;
-      GFX.drawCrystal(ctx, 30, 100, 20, '#5555FF');
-      GFX.drawCrystal(ctx, 70, 95, 15, '#FF5555');
-      GFX.drawCrystal(ctx, 280, 98, 18, '#55FF55');
-      GFX.drawCrystal(ctx, 250, 102, 12, '#FFFF55');
-      GFX.drawCrystal(ctx, 15, 105, 10, '#FF55FF');
-      ctx.globalAlpha = 1.0;
+      GFX.withAlpha(ctx, 0.33, () => {
+        GFX.drawCrystal(ctx, 30, 100, 20, '#5555FF');
+        GFX.drawCrystal(ctx, 70, 95, 15, '#FF5555');
+        GFX.drawCrystal(ctx, 280, 98, 18, '#55FF55');
+        GFX.drawCrystal(ctx, 250, 102, 12, '#FFFF55');
+        GFX.drawCrystal(ctx, 15, 105, 10, '#FF55FF');
+      });
       // Underground pool
       GFX.rect(ctx, 60, 140, 50, 20, '#112244');
       GFX.rect(ctx, 62, 142, 46, 16, '#1a3355');
