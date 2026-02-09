@@ -903,11 +903,13 @@ class GameEngine {
       choices.forEach((choice, i) => {
         const btn = document.createElement('button');
         btn.className = 'dialog-choice';
-        btn.textContent = choice.text;
+        // Support both string choices and {text, action} objects
+        const isString = typeof choice === 'string';
+        btn.textContent = isString ? choice : choice.text;
         btn.addEventListener('click', () => {
           this.dialogActive = false;
           panel.classList.add('hidden');
-          if (choice.action) choice.action(this);
+          if (!isString && choice.action) choice.action(this);
           if (callback) callback(i);
         });
         choicesDiv.appendChild(btn);

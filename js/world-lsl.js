@@ -272,6 +272,16 @@
       // Cash register
       GFX.rect(ctx, 155, 55, 15, 12, C.DKGRAY);
       GFX.rect(ctx, 157, 57, 11, 5, '#33AA33');
+      // Store clerk behind counter
+      GFX.rect(ctx, 138, 38, 8, 10, '#559955'); // green vest
+      GFX.rect(ctx, 139, 39, 6, 4, '#668866'); // vest highlight
+      GFX.rect(ctx, 139, 32, 6, 6, C.SKIN);    // head
+      GFX.rect(ctx, 139, 30, 6, 2, C.DKBROWN); // hair
+      GFX.rect(ctx, 140, 34, 1, 1, C.BLACK);   // eye
+      GFX.rect(ctx, 143, 34, 1, 1, C.BLACK);   // eye
+      // Phone in hand
+      GFX.rect(ctx, 146, 42, 3, 5, C.DKGRAY);
+      GFX.rect(ctx, 146, 43, 3, 3, '#4488FF');
       // Magazine rack
       GFX.rect(ctx, 70, 40, 30, 35, '#AA8855');
       const magColors = [C.RED, C.BLUE, C.PINK, C.YELLOW, C.GREEN];
@@ -339,7 +349,35 @@
       }
     ],
 
-    npcs: [],
+    npcs: [
+      {
+        name: 'Store Clerk', x: 142, y: 80, w: 16, h: 35,
+        onLook(eng) { eng.showMessage('A bored teenager in a green vest. They\'re scrolling through their phone with the intensity of a brain surgeon. Their name tag reads "TYLER."'); },
+        onTalk(eng) {
+          const count = eng.getFlag('clerk_talk') || 0;
+          eng.setFlag('clerk_talk', count + 1);
+          const responses = [
+            ['Tyler glances up from their phone for exactly 0.3 seconds. "Welcome to QuikStop. We\'re delighted you\'re here," they say in a monotone.', ['I need some supplies', 'Nice customer service', 'Carry on']],
+            ['"Oh, you\'re still here." Tyler doesn\'t look up this time.', ['What do you recommend?', 'Do you have condoms?', 'Never mind']],
+            ['"Look dude, buy something or let me get back to my feed. This kitten video isn\'t going to watch itself."', ['Fine, I\'ll buy something', 'You\'re very rude', 'Bye']]
+          ];
+          const r = responses[Math.min(count, responses.length - 1)];
+          eng.showDialog('Tyler', r[0], r[1], (choice) => {
+            if (count === 0 && choice === 1) {
+              eng.showMessage('Tyler\'s expression doesn\'t change. "Thank you for your feedback. It has been noted and will be ignored."');
+            } else if (count === 1 && choice === 1) {
+              eng.showMessage('Tyler finally looks up. "Aisle... actually, we don\'t have those. This is a QuikStop, not a... look, try the pharmacy." They return to their phone, ears red.');
+            } else if (choice === 0) {
+              eng.showMessage('Tyler waves vaguely at the store. "Everything\'s right there. Self-service. It\'s in the name. QuikStop. Quick. Stop. Done."');
+            } else {
+              eng.showMessage('Tyler is already back on their phone before you finish speaking.');
+            }
+          });
+        },
+        onUse(eng) { eng.showMessage('You try to get Tyler\'s attention by waving. They look through you like you\'re made of glass.'); },
+        onTake(eng) { eng.showMessage('Tyler is not for sale. Though given their work ethic, they might as well not be here at all.'); }
+      }
+    ],
 
     onEnter(eng) {
       if (!eng.getFlag('store_intro')) {
