@@ -81,12 +81,33 @@
         name: 'King\'s throne', x: 134, y: 55, w: 24, h: 40,
         onLook(eng) { eng.showMessage('King Graham\'s throne, the seat of Daventry\'s ruler. Slightly worn from years of heroic sitting. Has a faint scratch from when Graham tried to polish it with his sword.'); },
         onTake(eng) { eng.showMessage('You\'re already the king! You can\'t exactly take your own throne with you.'); },
-        onUse(eng) { eng.showMessage('You sit on your throne briefly. Ah, the responsibilities of kinghood. No time for sitting — there\'s chaos to fix!'); }
+        onUse(eng) {
+          const sits = eng.getFlag('throne_sit_count') || 0;
+          eng.setFlag('throne_sit_count', sits + 1);
+          const responses = [
+            'You sit on your throne briefly. Ah, the responsibilities of kinghood. No time for sitting — there\'s chaos to fix!',
+            'You sit again. The throne is comfortable. Too comfortable. Valanice clears her throat pointedly. Right, the kingdom.',
+            'You plop down on the throne AGAIN. The moat is still pudding, Graham. PUDDING. Get moving!',
+            'Another royal sit-down. At this rate, the Crystal of Order will reassemble itself out of sheer frustration with you.',
+            'You\'re sitting on the throne AGAIN?! Sierra would have docked you points for this. Oh wait — we CAN dock points. ...We won\'t, but we COULD.',
+            'Graham settles into his throne with a contented sigh. Somewhere, a magical crisis goes unsolved. The butterscotch pudding moat thickens.',
+            'The throne creaks under the weight of your procrastination. Kings who sit too much get replaced by more adventurous kings, you know.',
+          ];
+          eng.showMessage(responses[Math.min(sits, responses.length - 1)]);
+        },
+        onTalk(eng) { eng.showMessage('You whisper to your throne: "I\'ll be back." The throne does not respond, but appreciates the sentiment.'); },
+        onWalk(eng) {
+          const sits = eng.getFlag('throne_sit_count') || 0;
+          eng.setFlag('throne_sit_count', sits + 1);
+          eng.showMessage(sits > 2 ? 'You walk to your throne and sit down. AGAIN. The kingdom isn\'t going to save itself!' : 'You walk to your throne. It\'s tempting to sit, but duty calls.');
+        }
       },
       {
         name: 'Queen\'s throne', x: 162, y: 55, w: 24, h: 40,
         onLook(eng) { eng.showMessage('Queen Valanice\'s throne. Equally magnificent, with a slightly more comfortable cushion. The Queen has good taste.'); },
-        onTake(eng) { eng.showMessage('That\'s Valanice\'s throne! She would NOT appreciate you hauling it off.'); }
+        onTake(eng) { eng.showMessage('That\'s Valanice\'s throne! She would NOT appreciate you hauling it off.'); },
+        onUse(eng) { eng.showMessage('You sit in Valanice\'s throne. It IS more comfortable! She gives you a withering look. You stand up quickly, pretending nothing happened.'); },
+        onTalk(eng) { eng.showMessage('You address the Queen\'s throne. It has no opinion on the current crisis, being a chair.'); }
       },
       {
         name: 'treasure chest', x: 242, y: 85, w: 20, h: 15,
@@ -111,15 +132,32 @@
       {
         name: 'mirror', x: 10, y: 25, w: 20, h: 24,
         onLook(eng) { eng.showMessage('"Mirror, mirror on the wall..." The mirror responds: "Wrong fairy tale, Your Majesty." Typical Sierra sass.'); },
-        onTalk(eng) { eng.showMessage('The mirror sighs. "I\'m a mirror, not an oracle. Try the mushroom lady."'); }
+        onTalk(eng) {
+          const chats = eng.getFlag('mirror_chat_count') || 0;
+          eng.setFlag('mirror_chat_count', chats + 1);
+          const responses = [
+            'The mirror sighs. "I\'m a mirror, not an oracle. Try the mushroom lady."',
+            'The mirror groans. "You again? I reflect appearances, not solutions to your kingdom\'s problems."',
+            'The mirror: "Look, Your Majesty, I can see you have a LOT going on. Pudding moat, upside-down flowers, Latin-speaking cat. Maybe GO FIX THOSE instead of talking to furniture?"',
+            'The mirror just shows your reflection looking increasingly guilty about not saving the kingdom.',
+          ];
+          eng.showMessage(responses[Math.min(chats, responses.length - 1)]);
+        },
+        onUse(eng) { eng.showMessage('You polish the mirror with your sleeve. Your reflection polishes back. At least SOMEONE in this castle is being productive.'); },
+        onTake(eng) { eng.showMessage('The mirror is bolted to the wall. Besides, seven years of bad luck seems unwise when you already have a pudding moat situation.'); }
       },
       {
         name: 'tapestry', x: 110, y: 15, w: 16, h: 40,
-        onLook(eng) { eng.showMessage('A tapestry depicting the Kingdom of Daventry in better times. Before the pudding-moat incident.'); }
+        onLook(eng) { eng.showMessage('A tapestry depicting the Kingdom of Daventry in better times. Before the pudding-moat incident.'); },
+        onUse(eng) { eng.showMessage('You peek behind the tapestry hoping for a secret passage. There\'s just a wall. And a spider. The spider waves.'); },
+        onTake(eng) { eng.showMessage('The tapestry is sewn firmly to the wall. It depicts your coronation. You looked younger then. And less worried about pudding.'); },
+        onTalk(eng) { eng.showMessage('You narrate to the tapestry about the current crisis. The woven figures look unimpressed. Typical historical figures.'); }
       },
       {
         name: 'window', x: 40, y: 20, w: 18, h: 30,
-        onLook(eng) { eng.showMessage('Through the window, you can see the courtyard. The garden appears to be growing... downwards? That\'s new.'); }
+        onLook(eng) { eng.showMessage('Through the window, you can see the courtyard. The garden appears to be growing... downwards? That\'s new.'); },
+        onUse(eng) { eng.showMessage('You open the window. A breeze carries the scent of butterscotch pudding. You close the window.'); },
+        onTalk(eng) { eng.showMessage('You yell out the window: "EVERYTHING IS FINE!" It is not fine.'); }
       }
     ],
 
@@ -220,18 +258,33 @@
       {
         name: 'upside-down garden', x: 20, y: 68, w: 50, h: 35,
         onLook(eng) { eng.showMessage('The royal garden. The flowers are growing downward into the earth. The roses are particularly offended by this arrangement.'); },
-        onTalk(eng) { eng.showMessage('You address the garden: "Grow properly!" The flowers remain stubbornly inverted.'); }
+        onTalk(eng) { eng.showMessage('You address the garden: "Grow properly!" The flowers remain stubbornly inverted.'); },
+        onUse(eng) { eng.showMessage('You try to replant a flower right-side up. It flips itself upside-down with an audible "hmph." Even the gardening is rebellious.'); },
+        onTake(eng) { eng.showMessage('You pull up a flower. It replants itself upside-down in your hand. You give up and put it back.'); }
       },
       {
         name: 'pudding moat', x: 0, y: 55, w: 320, h: 8,
         onLook(eng) { eng.showMessage('The castle moat has been transformed into butterscotch pudding. It actually smells delicious.'); },
-        onTake(eng) { eng.showMessage('You scoop some pudding. It\'s butterscotch! You eat it. Delicious, but not useful.'); },
+        onTake(eng) {
+          const scoops = eng.getFlag('pudding_scoops') || 0;
+          eng.setFlag('pudding_scoops', scoops + 1);
+          const msgs = [
+            'You scoop some pudding. It\'s butterscotch! You eat it. Delicious, but not useful.',
+            'You scoop MORE pudding. Still butterscotch. Still delicious. Still not helping the kingdom.',
+            'You are eating pudding from a moat. This is what your reign has come to.',
+            'The pudding is starting to judge you. Kings shouldn\'t eat moat pudding, Graham.',
+          ];
+          eng.showMessage(msgs[Math.min(scoops, msgs.length - 1)]);
+        },
+        onUse(eng) { eng.showMessage('You dip a finger in the pudding. Yep, still butterscotch. The quality is actually quite good for a magical accident.'); },
+        onTalk(eng) { eng.showMessage('"Hello, pudding." The pudding bubbles. Was that a response, or just pudding being pudding? You\'ll never know.'); },
         onWalk(eng) { eng.die('You wade into the pudding moat and immediately sink. Butterscotch pudding is surprisingly deep. And sticky. Very sticky. Game Over.'); }
       },
       {
         name: 'old well', x: 238, y: 66, w: 24, h: 30,
         onLook(eng) { eng.showMessage('An old stone well. The water inside has turned a suspicious shade of purple. Best not to drink it.'); },
         onUse(eng) { eng.showMessage('You lower the bucket. It comes back up filled with what appears to be grape juice. The magic is thorough, you\'ll give it that.'); },
+        onTalk(eng) { eng.showMessage('You shout down the well: "Hello!" A tiny voice echoes back: "Fix the Crystal, you time-waster!" Rude.'); },
         onUseItem(eng, itemId) {
           if (itemId === 'bucket') {
             eng.showMessage('You lower the bucket into the well. The purple water looks magical, but it\'s not the enchanted pond water you need.');
@@ -331,17 +384,22 @@
         name: 'cooking pot', x: 30, y: 62, w: 20, h: 15,
         onLook(eng) { eng.showMessage('A bubbling cauldron of soup. The chef insists it\'s "rustic bouillabaisse" but it looks like regular turnip soup to you.'); },
         onTake(eng) { eng.showMessage('"HEY! Don\'t touch ze soup!" shouts the cook. Fair enough.'); },
-        onUse(eng) { eng.showMessage('You stir the soup. It stirs back. That\'s... probably the magic.'); }
+        onUse(eng) { eng.showMessage('You stir the soup. It stirs back. That\'s... probably the magic.'); },
+        onTalk(eng) { eng.showMessage('You compliment the soup. It bubbles appreciatively. Or threateningly. Hard to tell with enchanted bouillabaisse.'); }
       },
       {
         name: 'fireplace', x: 20, y: 40, w: 40, h: 35,
         onLook(eng) { eng.showMessage('A roaring fireplace. The flames dance merrily, seemingly unaffected by the magical chaos.'); },
+        onTalk(eng) { eng.showMessage('"Nice fire," you say. The fire crackles warmly. It\'s the most functional thing in the castle right now.'); },
+        onUse(eng) { eng.showMessage('You warm your hands by the fire. Cozy! But the kingdom isn\'t going to un-pudding itself, sire.'); },
         onWalk(eng) { eng.die('You walk directly into the fireplace. This was not your brightest idea. Even for an adventure game protagonist. Game Over.'); }
       },
       {
         name: 'spice jars', x: 200, y: 20, w: 50, h: 60,
         onLook(eng) { eng.showMessage('Shelves full of exotic spices: Dragon Pepper, Unicorn Salt, Troll Spice, and "Definitely Not Poison."'); },
-        onTake(eng) { eng.showMessage('The cook gives you a warning look. Better leave the spices alone.'); }
+        onTake(eng) { eng.showMessage('The cook gives you a warning look. Better leave the spices alone.'); },
+        onUse(eng) { eng.showMessage('You sniff the "Definitely Not Poison" jar. It smells like poison. Definitely.'); },
+        onTalk(eng) { eng.showMessage('"Any of you spices know how to fix a shattered Crystal of Order?" The spices remain unhelpfully aromatic.'); }
       }
     ],
 
@@ -472,12 +530,16 @@
       },
       {
         name: 'the Enchanted Isle', x: 220, y: 50, w: 60, h: 25,
-        onLook(eng) { eng.showMessage('A mysterious island on the horizon. It wasn\'t there last week. It\'s surrounded by a faint purple glow.'); }
+        onLook(eng) { eng.showMessage('A mysterious island on the horizon. It wasn\'t there last week. It\'s surrounded by a faint purple glow.'); },
+        onTalk(eng) { eng.showMessage('You shout toward the island: "I\'M COMING FOR YOU!" A seagull squawks back. Close enough.'); },
+        onUse(eng) { eng.showMessage('The island is too far away to interact with from here. You\'ll need a boat.'); }
       },
       {
         name: 'other boats', x: 35, y: 78, w: 35, h: 18,
         onLook(eng) { eng.showMessage('Some fishing boats. They\'re all chained up. Apparently nobody wants to sail toward the mysteriously glowing island. Go figure.'); },
-        onUse(eng) { eng.showMessage('These boats are locked up tight. You\'ll need to use Barnaby\'s boat.'); }
+        onUse(eng) { eng.showMessage('These boats are locked up tight. You\'ll need to use Barnaby\'s boat.'); },
+        onTake(eng) { eng.showMessage('You\'re a king, not a boat thief. Although technically, as king, it\'s "commandeering." Still, Barnaby\'s boat is the way to go.'); },
+        onTalk(eng) { eng.showMessage('You address the boats: "Any volunteers?" They bob silently. Typical boats. No initiative.'); }
       }
     ],
 
@@ -605,15 +667,20 @@
       {
         name: 'seashells', x: 98, y: 128, w: 8, h: 6,
         onLook(eng) { eng.showMessage('Pretty pink seashells. They whisper secrets of the deep... actually, no, that\'s just the ocean. You were hoping for game hints, weren\'t you?'); },
-        onTake(eng) { eng.showMessage('You pick up a shell and hold it to your ear. It says "Buy more Sierra games." You put it back.'); }
+        onTake(eng) { eng.showMessage('You pick up a shell and hold it to your ear. It says "Buy more Sierra games." You put it back.'); },
+        onUse(eng) { eng.showMessage('You arrange the shells into a little smiley face. The beach is now slightly more cheerful. The kingdom is still in chaos.'); },
+        onTalk(eng) { eng.showMessage('You whisper to a shell: "How do I fix everything?" The shell whispers back: "...have you tried talking to the mushroom lady?" Even shells know more than you.'); }
       },
       {
         name: 'footprints', x: 156, y: 95, w: 12, h: 40,
-        onLook(eng) { eng.showMessage('Strange footprints in the sand, leading north into the forest. They\'re large, clawed, and smell vaguely of mushrooms.'); }
+        onLook(eng) { eng.showMessage('Strange footprints in the sand, leading north into the forest. They\'re large, clawed, and smell vaguely of mushrooms.'); },
+        onTalk(eng) { eng.showMessage('You ask the footprints where they lead. They are footprints. They lead north. That\'s all they do.'); }
       },
       {
         name: 'ocean', x: 0, y: 60, w: 320, h: 28,
         onLook(eng) { eng.showMessage('The ocean stretches endlessly. You can see Daventry in the far distance. The water here has a faint purple shimmer.'); },
+        onTalk(eng) { eng.showMessage('"Oh great ocean, grant me wisdom!" you proclaim. A wave splashes your boots. The ocean has spoken. You are no wiser.'); },
+        onUse(eng) { eng.showMessage('You splash some water on your face. It\'s refreshing, if slightly purple. You glow faintly for a moment. Neat.'); },
         onWalk(eng) { eng.die('You wade into the enchanted ocean. A magical current pulls you under. Swimming was never covered in King School. Game Over.'); }
       },
       {
@@ -741,12 +808,15 @@
         name: 'red mushrooms', x: 65, y: 124, w: 30, h: 12,
         onLook(eng) { eng.showMessage('Common red-capped mushrooms. Pretty, but probably poisonous. The classic "eat me and die" variety.'); },
         onTake(eng) { eng.showMessage('You reach for a red mushroom, but a tiny voice squeaks: "Touch me and you\'ll regret it, pal!" You reconsider.'); },
+        onTalk(eng) { eng.showMessage('The red mushroom says: "I\'m toxic and proud. Now buzz off before I release my spores." Mushrooms are rude on this island.'); },
         onUse(eng) { eng.die('You eat the red mushroom. Bad idea. Really bad idea. The tiny mushroom voice was RIGHT. Game Over.'); }
       },
       {
         name: 'rune stone', x: 188, y: 112, w: 16, h: 14,
         onLook(eng) { eng.showMessage('An ancient stone covered in glowing runes. It reads: "BEWARE THE TROLL. SHE BITES." Helpful, if alarming.'); },
-        onTalk(eng) { eng.showMessage('You speak to the stone. It hums briefly and then displays new text: "WRONG AUDIENCE. TRY AGAIN." Stones these days.'); }
+        onTalk(eng) { eng.showMessage('You speak to the stone. It hums briefly and then displays new text: "WRONG AUDIENCE. TRY AGAIN." Stones these days.'); },
+        onUse(eng) { eng.showMessage('You rub the rune stone hoping for magic. The runes flicker and display: "THIS IS NOT A WISHING STONE. TRY THE FAIRY RING." At least it\'s helpful-ish.'); },
+        onTake(eng) { eng.showMessage('You try to lift the rune stone. It\'s absurdly heavy. The runes flash: "NICE TRY, TINY KING." Now it\'s just mocking you.'); }
       }
     ],
 
@@ -805,11 +875,15 @@
       {
         name: 'the chasm', x: 80, y: 135, w: 160, h: 35,
         onLook(eng) { eng.showMessage('A bottomless chasm. Well, it probably has a bottom somewhere, but you\'d rather not find out personally.'); },
+        onTalk(eng) { eng.showMessage('You shout into the chasm: "HELLO!" After a long pause, an echo returns: "...YOU\'RE WASTING TIME, GRAHAM!" Even the void judges you.'); },
+        onUse(eng) { eng.showMessage('You drop a pebble into the chasm. You never hear it land. That\'s... concerning.'); },
         onWalk(eng) { eng.die('You step off the bridge and plummet into the chasm. On the bright side, you discover it is NOT actually bottomless. The bottom is very hard. Game Over.'); }
       },
       {
         name: 'bridge railing', x: 80, y: 106, w: 160, h: 10,
-        onLook(eng) { eng.showMessage('Wooden railings. They look somewhat sturdy. "Somewhat" being the operative word.'); }
+        onLook(eng) { eng.showMessage('Wooden railings. They look somewhat sturdy. "Somewhat" being the operative word.'); },
+        onUse(eng) { eng.showMessage('You lean on the railing. It creaks ominously. You stop leaning on the railing. Good decision.'); },
+        onTalk(eng) { eng.showMessage('"Please hold," you say to the railing. It does. For now.'); }
       }
     ],
 
@@ -1026,7 +1100,9 @@
       {
         name: 'giant mushrooms', x: 45, y: 80, w: 30, h: 35,
         onLook(eng) { eng.showMessage('Enormous mushrooms tower over you. Their caps pulse with bioluminescent light. Somebody\'s been using magical fertilizer.'); },
-        onTalk(eng) { eng.showMessage('You address the giant mushroom. It doesn\'t respond. It\'s just a regular giant magical mushroom. Not the talking kind.'); }
+        onTalk(eng) { eng.showMessage('You address the giant mushroom. It doesn\'t respond. It\'s just a regular giant magical mushroom. Not the talking kind.'); },
+        onUse(eng) { eng.showMessage('You pat the giant mushroom. It vibrates gently, like a very large, very damp purring cat. Oddly soothing.'); },
+        onTake(eng) { eng.showMessage('You try to pick one. It\'s taller than you and firmly rooted. You\'d need a team of lumberjacks. Lumberjacks who specialize in fungi.'); }
       }
     ],
 
@@ -1171,11 +1247,15 @@
         name: 'garden gnome', x: 103, y: 121, w: 10, h: 15,
         onLook(eng) { eng.showMessage('A ceramic garden gnome. It has a cheeky grin and a tiny sign that reads "I\'m not a real gnome, obviously. Or am I?" Unsettling.'); },
         onTalk(eng) { eng.showMessage('The gnome winks at you. Wait, did it? No, it\'s ceramic. ...Right?'); },
-        onTake(eng) { eng.showMessage('The gnome is firmly rooted in place. Also, it might be watching you. Best leave it alone.'); }
+        onTake(eng) { eng.showMessage('The gnome is firmly rooted in place. Also, it might be watching you. Best leave it alone.'); },
+        onUse(eng) { eng.showMessage('You spin the gnome around. When you look back, it\'s facing you again. You did NOT spin it back. You walk away quickly.'); }
       },
       {
         name: 'crooked sign', x: 205, y: 118, w: 35, h: 15,
-        onLook(eng) { eng.showMessage('A crooked wooden sign reads: "Fumblemore\'s Tower of Magnificent Magics and Minor Disasters. Open Thursdays." Today is not Thursday.'); }
+        onLook(eng) { eng.showMessage('A crooked wooden sign reads: "Fumblemore\'s Tower of Magnificent Magics and Minor Disasters. Open Thursdays." Today is not Thursday.'); },
+        onTalk(eng) { eng.showMessage('You read the sign aloud. Nothing happens. Signs work best when you just look at them.'); },
+        onUse(eng) { eng.showMessage('You try to straighten the sign. It immediately tilts back to its crooked angle. It appears to WANT to be crooked. Magic.'); },
+        onTake(eng) { eng.showMessage('You tug at the sign. New text appears: "HANDS OFF, ROYAL BOY." Apparently, it\'s an enchanted sign.'); }
       }
     ],
 
@@ -1330,8 +1410,19 @@
           eng.showMessage('A crystal ball shows swirling images: a broken crystal, a dark cavern, and what appears to be a troll eating a sandwich. Useful? Maybe.');
         },
         onUse(eng) {
-          eng.showMessage('You peer into the crystal ball. It shows you... yourself, peering into a crystal ball. How very meta.');
-        }
+          const peeks = eng.getFlag('crystal_ball_peeks') || 0;
+          eng.setFlag('crystal_ball_peeks', peeks + 1);
+          const visions = [
+            'You peer into the crystal ball. It shows you... yourself, peering into a crystal ball. How very meta.',
+            'The crystal ball shows Chef Pierre\'s soup achieving sentience. That\'s probably fine.',
+            'You see a vision of the royal cat conjugating Latin verbs. "Amo, amas, amat..." It\'s quite fluent.',
+            'The ball shows a possible future where you\'re STILL sitting on your throne instead of adventuring. The ball is judging you.',
+            'The crystal ball flickers and displays: "NO SIGNAL." Even magical artifacts have technical difficulties.',
+          ];
+          eng.showMessage(visions[Math.min(peeks, visions.length - 1)]);
+        },
+        onTalk(eng) { eng.showMessage('"Show me the way forward!" The ball shows you a door. THE door. Right behind you. Subtle.'); },
+        onTake(eng) { eng.showMessage('Fumblemore\'s crystal ball. Best not to steal from a wizard. Even an incompetent one.'); }
       },
       {
         name: 'potions', x: 228, y: 74, w: 35, h: 15,
@@ -1616,6 +1707,9 @@
       {
         name: 'underground pool', x: 58, y: 138, w: 55, h: 22,
         onLook(eng) { eng.showMessage('A dark underground pool. Strange lights flicker in its depths. You can\'t tell how deep it is.'); },
+        onTalk(eng) { eng.showMessage('You address the pool. Something blinks under the surface. You decide to stop addressing the pool.'); },
+        onUse(eng) { eng.showMessage('You dip a toe in. It\'s FREEZING. Your toe glows briefly blue. You withdraw it immediately. Nope.'); },
+        onTake(eng) { eng.showMessage('You cup some water. It seeps through your fingers and hisses on the ground. This water does NOT want to be taken.'); },
         onWalk(eng) { eng.die('You wade into the underground pool. It\'s impossibly deep, and something cold grabs your ankle. You shouldn\'t have gone for a swim in a magic cavern. Game Over.'); }
       }
     ],
