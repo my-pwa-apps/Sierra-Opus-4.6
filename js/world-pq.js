@@ -471,9 +471,9 @@
       // Sky
       GFX.drawSky(ctx, w, h * 0.35, '#8899BB', '#BBCCEE');
       // Trees
-      GFX.drawTree(ctx, 30, 82, 35);
-      GFX.drawTree(ctx, 100, 75, 40);
-      GFX.drawTree(ctx, 250, 80, 35);
+      GFX.drawDeciduousTree(ctx, 30, 82, 35);
+      GFX.drawDeciduousTree(ctx, 100, 75, 40);
+      GFX.drawDeciduousTree(ctx, 250, 80, 35);
       // Grass
       GFX.rect(ctx, 0, 80, w, h - 80, C.GREEN);
       GFX.rect(ctx, 0, 80, w, 3, '#55AA55');
