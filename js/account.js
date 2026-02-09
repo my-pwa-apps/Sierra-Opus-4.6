@@ -1,24 +1,30 @@
 /* ============================================
-   King's Quest: The Enchanted Isle
+   Sierra Tribute Collection
    Save Manager - Name-based save/load system
+   Per-game save storage with shared identity
    ============================================ */
 
 const AccountManager = {
   currentUser: null,
+  gamePrefix: 'kq',
+
+  setGamePrefix(prefix) {
+    this.gamePrefix = prefix || 'kq';
+  },
 
   // ── Set Player Name ──
   setName(name) {
     this.currentUser = name.trim().toLowerCase();
-    localStorage.setItem('kq_last_player', this.currentUser);
-    localStorage.setItem('kq_display_name_' + this.currentUser, name.trim());
+    localStorage.setItem('sierra_last_player', this.currentUser);
+    localStorage.setItem('sierra_display_name_' + this.currentUser, name.trim());
   },
 
   getLastPlayer() {
-    return localStorage.getItem('kq_last_player') || '';
+    return localStorage.getItem('sierra_last_player') || localStorage.getItem('kq_last_player') || '';
   },
 
   _getUserKey() {
-    return this.currentUser ? `kq_user_${this.currentUser}` : 'kq_guest';
+    return this.currentUser ? `${this.gamePrefix}_user_${this.currentUser}` : `${this.gamePrefix}_guest`;
   },
 
   _getUserData() {
@@ -32,7 +38,7 @@ const AccountManager = {
 
   getDisplayName() {
     if (!this.currentUser) return 'Adventurer';
-    return localStorage.getItem('kq_display_name_' + this.currentUser) || this.currentUser;
+    return localStorage.getItem('sierra_display_name_' + this.currentUser) || localStorage.getItem('kq_display_name_' + this.currentUser) || this.currentUser;
   },
 
   // ── Save Game ──

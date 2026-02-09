@@ -1807,7 +1807,7 @@
   //  REGISTER ALL SCENES
   // ═══════════════════════════════════
 
-  window.GameScenes = {
+  const kqScenes = {
     throneRoom,
     courtyard,
     kitchen,
@@ -1820,5 +1820,12 @@
     towerInterior,
     crystalCavern
   };
+
+  // Register King's Quest in the multi-game registry
+  window.GameWorlds = window.GameWorlds || {};
+  window.GameWorlds.kq = kqScenes;
+
+  // Backward compatibility
+  window.GameScenes = kqScenes;
 
 })();

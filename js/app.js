@@ -1,6 +1,6 @@
 /* ============================================
-   King's Quest: The Enchanted Isle
-   App Bootstrap - Initialization & Screen Flow
+   Sierra Tribute Collection
+   App Bootstrap - Launcher, Screen Flow & VR
    ============================================ */
 
 const App = {
@@ -8,6 +8,71 @@ const App = {
   titleAnimId: null,
   vrSession: null,
   vrSupported: false,
+  selectedGameId: null,
+
+  // ── Game Configurations ──
+  gameConfigs: {
+    kq: {
+      id: 'kq', title: "King's Quest", subtitle: 'The Enchanted Isle',
+      credit: 'A Sierra On-Line Adventure', themeColor: '#003366',
+      maxScore: 145, startScene: 'throneRoom', startX: 160, startY: 135,
+      drawCharacter: (...args) => GFX.drawGraham(...args),
+      drawTitle: (ctx, w, h, phase) => GFX.drawTitleScreen(ctx, w, h, phase),
+      titleColor: '#DAA520',
+      introMessages: [
+        { message: 'In the Kingdom of Daventry, something strange is afoot...', duration: 3000 },
+        { message: 'The castle moat has turned to pudding, the gardens grow backwards, and the royal cat now speaks fluent Latin.', duration: 4500 },
+        { message: 'King Graham must find the source of this magical mayhem and put things right!', duration: 3500 },
+      ],
+      aboutText: "King's Quest: The Enchanted Isle\n━━━━━━━━━━━━━━━━━━━━━━━━━━━\nA Sierra On-Line style adventure\n\nStory: King Graham must travel to a mysterious\nisland to find the wizard Fumblemore, who\naccidentally shattered the Crystal of Order,\nsending all magic haywire!\n\nVR: Put on your headset and press Enter VR\nto explore as King Graham in first person!\n\nScore: 145 points possible",
+      storagePrefix: 'kq', hasVR: true, emoji: '👑'
+    },
+    lsl: {
+      id: 'lsl', title: 'Leisure Suit Larry', subtitle: 'Byte Club',
+      credit: 'A Sierra On-Line Adventure', themeColor: '#660033',
+      maxScore: 100, startScene: 'bar', startX: 160, startY: 140,
+      drawCharacter: (...args) => GFX.drawLarry(...args),
+      drawTitle: (ctx, w, h, phase) => GFX.drawTitleScreenLSL(ctx, w, h, phase),
+      titleColor: '#FF69B4',
+      introMessages: [
+        { message: 'In the neon-lit city of Lost Wages...', duration: 3000 },
+        { message: "Larry Laffer, the world's most hopeless romantic, arrives looking for love in all the wrong places.", duration: 4500 },
+        { message: "Armed with nothing but a leisure suit, bad pickup lines, and unshakeable optimism, Larry's adventure begins!", duration: 3500 },
+      ],
+      aboutText: "Leisure Suit Larry: Byte Club\n━━━━━━━━━━━━━━━━━━━━━━━━━━━\nA Sierra On-Line style adventure\n\nStory: Larry Laffer arrives in Lost Wages\nhoping to find true love. Navigate nightlife,\nsurvive awkward encounters, and try not to\nembarrass yourself too badly!\n\nScore: 100 points possible",
+      storagePrefix: 'lsl', hasVR: false, emoji: '🕺'
+    },
+    sq: {
+      id: 'sq', title: 'Space Quest', subtitle: 'Debris of Destiny',
+      credit: 'A Sierra On-Line Adventure', themeColor: '#000033',
+      maxScore: 100, startScene: 'janitorCloset', startX: 160, startY: 130,
+      drawCharacter: (...args) => GFX.drawRoger(...args),
+      drawTitle: (ctx, w, h, phase) => GFX.drawTitleScreenSQ(ctx, w, h, phase),
+      titleColor: '#00CCFF',
+      introMessages: [
+        { message: 'Somewhere in the Andromeda galaxy...', duration: 3000 },
+        { message: 'The SS Titanium, a state-of-the-art research vessel, has been boarded by the dreaded Sludge Pirates.', duration: 4500 },
+        { message: 'The entire crew has been captured. All except one... the janitor who was napping in a supply closet.', duration: 3500 },
+      ],
+      aboutText: "Space Quest: Debris of Destiny\n━━━━━━━━━━━━━━━━━━━━━━━━━━━\nA Sierra On-Line style adventure\n\nStory: You're the janitor on the SS Titanium.\nWhen aliens capture the crew, it's up to\nyou and your trusty mop to save everyone.\nYou are spectacularly unqualified for this.\n\nScore: 100 points possible",
+      storagePrefix: 'sq', hasVR: false, emoji: '🚀'
+    },
+    pq: {
+      id: 'pq', title: 'Police Quest', subtitle: 'Code Blue',
+      credit: 'A Sierra On-Line Adventure', themeColor: '#003355',
+      maxScore: 100, startScene: 'briefingRoom', startX: 160, startY: 130,
+      drawCharacter: (...args) => GFX.drawOfficer(...args),
+      drawTitle: (ctx, w, h, phase) => GFX.drawTitleScreenPQ(ctx, w, h, phase),
+      titleColor: '#4488CC',
+      introMessages: [
+        { message: 'In the city of Lytton Springs...', duration: 3000 },
+        { message: "A wave of mysterious burglaries has the police department baffled. Evidence just doesn't add up.", duration: 4500 },
+        { message: "Rookie Officer Jack Stone is assigned to the case. What could go wrong? (Everything. Everything could go wrong.)", duration: 3500 },
+      ],
+      aboutText: "Police Quest: Code Blue\n━━━━━━━━━━━━━━━━━━━━━━━━━━━\nA Sierra On-Line style adventure\n\nStory: You're Officer Jack Stone, rookie cop\nin Lytton Springs. Investigate a string\nof burglaries that may lead to something\nmuch bigger. Follow procedure!\n\nScore: 100 points possible",
+      storagePrefix: 'pq', hasVR: false, emoji: '🚔'
+    }
+  },
 
   init() {
     // Register Service Worker
@@ -17,11 +82,13 @@ const App = {
 
     // Screen transitions
     this.screens = {
+      launcher: document.getElementById('launcher-screen'),
       login: document.getElementById('login-screen'),
       title: document.getElementById('title-screen'),
       game: document.getElementById('game-screen'),
     };
 
+    this.setupLauncher();
     this.setupNameScreen();
     this.setupTitle();
     this.checkVR();
@@ -29,9 +96,48 @@ const App = {
     // Pre-fill last used name
     const lastPlayer = AccountManager.getLastPlayer();
     if (lastPlayer) {
-      const displayName = localStorage.getItem('kq_display_name_' + lastPlayer) || lastPlayer;
+      const displayName = localStorage.getItem('sierra_display_name_' + lastPlayer) || localStorage.getItem('kq_display_name_' + lastPlayer) || lastPlayer;
       document.getElementById('username').value = displayName;
     }
+  },
+
+  // ── Launcher Screen ──
+  setupLauncher() {
+    const gameCards = document.querySelectorAll('.game-card');
+    gameCards.forEach(card => {
+      card.addEventListener('click', () => {
+        const id = card.dataset.game;
+        this.selectGame(id);
+      });
+    });
+
+    // Render mini previews on each card canvas
+    gameCards.forEach(card => {
+      const id = card.dataset.game;
+      const cfg = this.gameConfigs[id];
+      if (!cfg) return;
+      const canvas = card.querySelector('.game-preview');
+      if (!canvas) return;
+      const ctx = canvas.getContext('2d');
+      ctx.imageSmoothingEnabled = false;
+      cfg.drawTitle(ctx, canvas.width, canvas.height, 0.5);
+    });
+  },
+
+  selectGame(id) {
+    const cfg = this.gameConfigs[id];
+    if (!cfg) return;
+    this.selectedGameId = id;
+    AccountManager.setGamePrefix(cfg.storagePrefix);
+    // Update theme color
+    const meta = document.querySelector('meta[name="theme-color"]');
+    if (meta) meta.setAttribute('content', cfg.themeColor);
+    // Update login screen title
+    const titleEl = document.getElementById('login-game-title');
+    const subEl = document.getElementById('login-game-subtitle');
+    if (titleEl) titleEl.textContent = cfg.title;
+    if (subEl) subEl.textContent = cfg.subtitle;
+    this.showScreen('login');
   },
 
   showScreen(name) {
@@ -98,30 +204,22 @@ const App = {
     });
 
     document.getElementById('btn-about').addEventListener('click', () => {
+      const cfg = this.gameConfigs[this.selectedGameId] || this.gameConfigs.kq;
       alert(
-        "King's Quest: The Enchanted Isle\n" +
-        "━━━━━━━━━━━━━━━━━━━━━━━━━━━\n" +
-        "A Sierra On-Line style adventure\n\n" +
-        "Story: King Graham must travel to a mysterious\n" +
-        "island to find the wizard Fumblemore, who\n" +
-        "accidentally shattered the Crystal of Order,\n" +
-        "sending all magic haywire!\n\n" +
+        cfg.aboutText + "\n\n" +
         "Gameplay Tips:\n" +
         "• Use the verb buttons to interact\n" +
         "• Check your inventory often\n" +
         "• Talk to everyone (twice!)\n" +
         "• SAVE OFTEN (This is a Sierra game!)\n" +
         "• Be careful what you eat or walk into...\n\n" +
-        "VR: Put on your headset and press Enter VR\n" +
-        "to explore as King Graham in first person!\n\n" +
-        "Score: 145 points possible\n\n" +
         "Built with ♥ in the spirit of classic Sierra adventures"
       );
     });
 
     document.getElementById('btn-back').addEventListener('click', () => {
       this.stopTitleAnim();
-      this.showScreen('login');
+      this.showScreen('launcher');
     });
 
     // VR button
@@ -135,11 +233,19 @@ const App = {
     this.showScreen('title');
     this.startTitleAnim();
 
+    const cfg = this.gameConfigs[this.selectedGameId] || this.gameConfigs.kq;
+
     // Update continue button state
     const btn = document.getElementById('btn-continue');
     const hasSaves = AccountManager.hasSaves();
     btn.style.opacity = hasSaves ? '1' : '0.5';
     btn.style.pointerEvents = hasSaves ? 'auto' : 'auto'; // always clickable for feedback
+
+    // VR button visibility
+    const vrBtn = document.getElementById('btn-vr');
+    if (vrBtn) {
+      vrBtn.style.display = (cfg.hasVR && this.vrSupported) ? '' : 'none';
+    }
 
     // Show welcome message
     const name = AccountManager.getDisplayName();
@@ -157,6 +263,7 @@ const App = {
   startTitleAnim() {
     const canvas = document.getElementById('title-canvas');
     const ctx = canvas.getContext('2d');
+    const cfg = this.gameConfigs[this.selectedGameId] || this.gameConfigs.kq;
 
     // Size title canvas to fill screen
     const rect = this.screens.title.getBoundingClientRect();
@@ -169,21 +276,21 @@ const App = {
       const dt = Math.min((now - lastTime) / 1000, 0.05);
       lastTime = now;
       this.titlePhase += dt;
-      GFX.drawTitleScreen(ctx, canvas.width, canvas.height, this.titlePhase);
+      cfg.drawTitle(ctx, canvas.width, canvas.height, this.titlePhase);
 
       // Title text overlay
-      ctx.fillStyle = '#DAA520';
+      ctx.fillStyle = cfg.titleColor || '#DAA520';
       ctx.font = 'bold 28px "Press Start 2P", monospace';
       ctx.textAlign = 'center';
-      ctx.fillText("KING'S QUEST", canvas.width/2, canvas.height * 0.22);
+      ctx.fillText(cfg.title.toUpperCase(), canvas.width/2, canvas.height * 0.22);
 
       ctx.fillStyle = '#AAD';
       ctx.font = '14px "Press Start 2P", monospace';
-      ctx.fillText('The Enchanted Isle', canvas.width/2, canvas.height * 0.28);
+      ctx.fillText(cfg.subtitle, canvas.width/2, canvas.height * 0.28);
 
       ctx.fillStyle = '#888';
       ctx.font = '8px "Press Start 2P", monospace';
-      ctx.fillText('A Sierra On-Line Adventure', canvas.width/2, canvas.height * 0.33);
+      ctx.fillText(cfg.credit, canvas.width/2, canvas.height * 0.33);
 
       this.titleAnimId = requestAnimationFrame(animate);
     };
@@ -202,6 +309,8 @@ const App = {
     this.showScreen('game');
 
     const eng = window.Engine;
+    const cfg = this.gameConfigs[this.selectedGameId] || this.gameConfigs.kq;
+    const worlds = window.GameWorlds || {};
 
     // Only init once - prevent re-binding event listeners
     if (!this._gameInitialized) {
@@ -209,8 +318,9 @@ const App = {
       this._gameInitialized = true;
     }
 
-    // Register scenes
-    eng.scenes = window.GameScenes;
+    // Register per-game scenes and config
+    eng.scenes = worlds[cfg.id] || worlds.kq || window.GameScenes;
+    eng.gameConfig = cfg;
 
     if (saveData) {
       eng.loadSaveData(saveData);

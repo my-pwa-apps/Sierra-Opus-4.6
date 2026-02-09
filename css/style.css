@@ -1,5 +1,5 @@
 /* ============================================
-   King's Quest: The Enchanted Isle
+   Sierra Tribute Collection
    Sierra On-Line Style CSS
    ============================================ */
 
@@ -49,6 +49,7 @@ html, body {
   flex-direction: column;
   align-items: center;
   justify-content: center;
+  overflow-y: auto;
 }
 
 /* ── Login Screen ── */
@@ -617,4 +618,114 @@ html, body {
 ::-webkit-scrollbar-thumb {
   background: var(--sierra-gold);
   border-radius: 3px;
+}
+
+/* ============================================
+   Launcher Screen
+   ============================================ */
+
+.launcher-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 100%;
+  padding: 1rem;
+  text-align: center;
+}
+
+.launcher-title {
+  font-family: var(--pixel-font);
+  font-size: clamp(0.55rem, 2vw, 0.85rem);
+  color: var(--sierra-gold);
+  text-shadow: 0 0 10px rgba(218, 165, 32, 0.4);
+  margin: 0.5rem 0 0.1rem;
+  letter-spacing: 1px;
+}
+
+.launcher-subtitle {
+  font-family: var(--pixel-font);
+  font-size: clamp(0.3rem, 1.2vw, 0.45rem);
+  color: #AAD;
+  margin-bottom: 0.8rem;
+}
+
+.game-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 0.6rem;
+  max-width: 580px;
+  width: 100%;
+  padding: 0 0.5rem;
+}
+
+.game-card {
+  background: rgba(26, 26, 46, 0.85);
+  border: 2px solid rgba(218, 165, 32, 0.3);
+  border-radius: 8px;
+  overflow: hidden;
+  cursor: pointer;
+  transition: transform 0.2s, border-color 0.2s, box-shadow 0.2s;
+}
+
+.game-card:hover {
+  transform: translateY(-3px);
+  border-color: var(--sierra-gold);
+  box-shadow: 0 4px 20px rgba(218, 165, 32, 0.25);
+}
+
+.game-card:active {
+  transform: translateY(0);
+}
+
+.game-preview {
+  width: 100%;
+  height: auto;
+  display: block;
+  aspect-ratio: 320 / 200;
+  image-rendering: pixelated;
+  image-rendering: crisp-edges;
+  background: #000;
+}
+
+.game-card-info {
+  padding: 0.35rem;
+  text-align: center;
+  background: rgba(0, 0, 0, 0.4);
+}
+
+.game-emoji {
+  font-size: 1rem;
+  display: block;
+  margin-bottom: 0.15rem;
+}
+
+.game-card-info h3 {
+  font-family: var(--pixel-font);
+  font-size: clamp(0.28rem, 1vw, 0.38rem);
+  color: var(--sierra-gold);
+  margin: 0 0 0.1rem;
+}
+
+.game-card-info p {
+  font-family: var(--pixel-font);
+  font-size: clamp(0.22rem, 0.8vw, 0.28rem);
+  color: #AAD;
+  margin: 0;
+}
+
+/* Mobile: single column for small screens */
+@media (max-width: 420px) {
+  .game-grid {
+    grid-template-columns: 1fr;
+    gap: 0.5rem;
+  }
+
+  .game-card-info {
+    padding: 0.25rem;
+  }
+
+  .launcher-title {
+    font-size: 0.5rem;
+  }
 }

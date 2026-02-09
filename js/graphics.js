@@ -1112,5 +1112,799 @@ const GFX = {
     ctx.beginPath();
     ctx.arc(w * 0.8 + 5, h * 0.15 - 3, 13, 0, Math.PI * 2);
     ctx.fill();
+  },
+
+  // ═══════════════════════════════════════════════
+  //  LEISURE SUIT LARRY - Character & Drawing
+  // ═══════════════════════════════════════════════
+
+  drawLarry(ctx, x, y, dir, frame, actionAnim) {
+    const c = this.C;
+    // Larry: white leisure suit, dark hair, gold chain
+    // y is foot position, draw upward
+
+    // Action animations
+    if (actionAnim) {
+      // Simple action pose
+      this.rect(ctx, x - 4, y - 22, 8, 10, c.WHITE); // body
+      this.rect(ctx, x - 3, y - 28, 6, 6, c.SKIN); // head
+      this.rect(ctx, x - 3, y - 31, 6, 3, '#331100'); // hair
+      this.rect(ctx, x - 3, y - 12, 3, 6, c.WHITE); // legs
+      this.rect(ctx, x, y - 12, 3, 6, c.WHITE);
+      this.rect(ctx, x - 3, y - 6, 3, 6, '#333'); // shoes
+      this.rect(ctx, x, y - 6, 3, 6, '#333');
+      // Extended arm
+      this.rect(ctx, x + 4, y - 22, 6, 3, c.WHITE);
+      this.rect(ctx, x + 8, y - 22, 3, 3, c.SKIN);
+      this.pixel(ctx, x, y - 21, c.GOLD); // chain
+      return;
+    }
+
+    const stepOff = (frame >= 0) ? Math.sin(frame * Math.PI / 2) * 2 : 0;
+    const legL = (frame >= 0) ? Math.sin(frame * Math.PI / 2) * 2 : 0;
+    const legR = -legL;
+
+    if (dir === 0 || dir === 2) { // Facing south/north
+      // Shoes
+      this.rect(ctx, x - 4, y - 6 + legL, 3, 6, '#333');
+      this.rect(ctx, x + 1, y - 6 + legR, 3, 6, '#333');
+      // Pants
+      this.rect(ctx, x - 4, y - 12 + legL, 3, 6, c.WHITE);
+      this.rect(ctx, x + 1, y - 12 + legR, 3, 6, c.WHITE);
+      // Body (jacket)
+      this.rect(ctx, x - 5, y - 22, 10, 10, c.WHITE);
+      this.rect(ctx, x - 4, y - 21, 8, 8, '#EEEEEE');
+      // Gold chain
+      this.pixel(ctx, x - 1, y - 20, c.GOLD);
+      this.pixel(ctx, x, y - 19, c.GOLD);
+      this.pixel(ctx, x + 1, y - 20, c.GOLD);
+      // Head
+      this.rect(ctx, x - 3, y - 28, 6, 6, c.SKIN);
+      // Hair (dark pompadour)
+      this.rect(ctx, x - 3, y - 31, 6, 3, '#331100');
+      this.rect(ctx, x - 4, y - 30, 1, 2, '#331100');
+      if (dir === 0) {
+        // Eyes and smile (south)
+        this.pixel(ctx, x - 1, y - 27, c.BLACK);
+        this.pixel(ctx, x + 1, y - 27, c.BLACK);
+        this.pixel(ctx, x - 1, y - 25, c.SKIN);
+        this.pixel(ctx, x + 1, y - 25, c.SKIN);
+        this.rect(ctx, x - 1, y - 24, 3, 1, c.RED); // goofy smile
+      }
+      // Arms
+      this.rect(ctx, x - 7, y - 21 - stepOff, 2, 8, c.WHITE);
+      this.rect(ctx, x + 5, y - 21 + stepOff, 2, 8, c.WHITE);
+    } else { // Side view
+      const flip = dir === 3 ? 1 : -1;
+      // Shoes
+      this.rect(ctx, x - 2 + legL * flip, y - 6, 4, 6, '#333');
+      this.rect(ctx, x - 2 + legR * flip, y - 6, 4, 6, '#333');
+      // Pants
+      this.rect(ctx, x - 2 + legL * flip, y - 12, 4, 6, c.WHITE);
+      this.rect(ctx, x - 2 + legR * flip, y - 12, 4, 6, c.WHITE);
+      // Body
+      this.rect(ctx, x - 4, y - 22, 8, 10, c.WHITE);
+      this.pixel(ctx, x, y - 20, c.GOLD); // chain
+      // Head
+      this.rect(ctx, x - 3, y - 28, 6, 6, c.SKIN);
+      this.rect(ctx, x - 3, y - 31, 6, 3, '#331100');
+      // Eye
+      this.pixel(ctx, x + flip * 1, y - 27, c.BLACK);
+      // Arm
+      this.rect(ctx, x + flip * 3, y - 21, 2, 8, c.WHITE);
+    }
+  },
+
+  // ── LSL Title Screen ──
+  drawTitleScreenLSL(ctx, w, h, phase) {
+    const c = this.C;
+    // Night city scene
+    this.drawSky(ctx, w, h, '#110022', '#330044');
+
+    // Stars
+    for (let i = 0; i < 25; i++) {
+      const sx = this.seededRandom(i * 7) * w;
+      const sy = this.seededRandom(i * 13) * h * 0.3;
+      const twinkle = Math.sin(phase * 2 + i) * 0.3 + 0.7;
+      ctx.globalAlpha = twinkle;
+      this.pixel(ctx, sx, sy, c.WHITE);
+      ctx.globalAlpha = 1;
+    }
+
+    // City skyline
+    const buildings = [
+      { x: 0, w: 60, h: 180, color: '#1a0a2a' },
+      { x: 55, w: 45, h: 220, color: '#220e3a' },
+      { x: 95, w: 70, h: 160, color: '#1a0a2a' },
+      { x: 160, w: 50, h: 240, color: '#2a1040' },
+      { x: 205, w: 80, h: 190, color: '#220e3a' },
+      { x: 280, w: 55, h: 210, color: '#1a0a2a' },
+      { x: 330, w: 90, h: 170, color: '#2a1040' },
+      { x: 415, w: 65, h: 230, color: '#220e3a' },
+      { x: 475, w: 80, h: 185, color: '#1a0a2a' },
+      { x: 550, w: 90, h: 200, color: '#220e3a' },
+    ];
+    for (const b of buildings) {
+      this.rect(ctx, b.x, h - b.h, b.w, b.h, b.color);
+      // Windows
+      for (let wy = h - b.h + 10; wy < h - 20; wy += 15) {
+        for (let wx = b.x + 5; wx < b.x + b.w - 5; wx += 10) {
+          const lit = this.seededRandom(wx * 7 + wy * 13) > 0.4;
+          if (lit) {
+            const flicker = Math.sin(phase + wx + wy) * 0.15 + 0.85;
+            ctx.globalAlpha = flicker;
+            this.rect(ctx, wx, wy, 4, 5, '#FFCC44');
+            ctx.globalAlpha = 1;
+          }
+        }
+      }
+    }
+
+    // Neon signs
+    const neonGlow = Math.sin(phase * 3) * 0.3 + 0.7;
+    ctx.globalAlpha = neonGlow;
+    this.rect(ctx, 170, h - 200, 30, 8, '#FF1493');
+    this.rect(ctx, 320, h - 130, 40, 8, '#00FFFF');
+    ctx.globalAlpha = 1;
+
+    // Street level
+    this.rect(ctx, 0, h - 30, w, 30, '#111');
+    this.rect(ctx, 0, h - 32, w, 2, '#333');
+
+    // Street lights
+    for (let lx = 50; lx < w; lx += 120) {
+      this.rect(ctx, lx, h - 80, 2, 50, '#444');
+      const glow = Math.sin(phase + lx) * 0.1 + 0.9;
+      ctx.globalAlpha = glow;
+      this.rect(ctx, lx - 4, h - 82, 10, 4, '#FFD700');
+      ctx.globalAlpha = 0.15;
+      ctx.fillStyle = '#FFD700';
+      ctx.beginPath();
+      ctx.arc(lx + 1, h - 45, 20, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.globalAlpha = 1;
+    }
+  },
+
+  // ── LSL Scene Drawing Helpers ──
+  drawNeonSign(ctx, x, y, w, h, color, phase) {
+    const glow = Math.sin(phase * 3) * 0.3 + 0.7;
+    const prevAlpha = ctx.globalAlpha;
+    ctx.globalAlpha = glow * prevAlpha;
+    this.rect(ctx, x, y, w, h, color);
+    ctx.globalAlpha = 0.2 * prevAlpha;
+    ctx.fillStyle = color;
+    ctx.beginPath();
+    ctx.arc(x + w/2, y + h/2, Math.max(w, h), 0, Math.PI * 2);
+    ctx.fill();
+    ctx.globalAlpha = prevAlpha;
+  },
+
+  drawBarCounter(ctx, x, y, w) {
+    const c = this.C;
+    this.rect(ctx, x, y, w, 12, c.DKBROWN);
+    this.rect(ctx, x + 1, y + 1, w - 2, 3, c.BROWN);
+    this.rect(ctx, x + 1, y + 4, w - 2, 7, '#4a2a10');
+    // Bar stools
+    for (let sx = x + 10; sx < x + w - 10; sx += 25) {
+      this.rect(ctx, sx, y + 12, 2, 15, c.DKGRAY);
+      this.rect(ctx, sx - 3, y + 10, 8, 3, c.RED);
+    }
+  },
+
+  drawJukebox(ctx, x, y, phase) {
+    const c = this.C;
+    this.rect(ctx, x, y, 16, 24, c.DKGRAY);
+    this.rect(ctx, x + 1, y + 1, 14, 10, '#442244');
+    // Color bands
+    const bands = ['#FF3366', '#FF9933', '#FFFF33', '#33FF66', '#3366FF'];
+    for (let i = 0; i < bands.length; i++) {
+      const bright = Math.sin(phase * 4 + i) * 0.3 + 0.7;
+      const prevAlpha = ctx.globalAlpha;
+      ctx.globalAlpha = bright * prevAlpha;
+      this.rect(ctx, x + 2 + i * 2, y + 2, 2, 8, bands[i]);
+      ctx.globalAlpha = prevAlpha;
+    }
+    this.rect(ctx, x + 2, y + 13, 12, 8, c.GRAY);
+    this.rect(ctx, x + 1, y + 22, 14, 2, c.GOLD);
+  },
+
+  drawSlotMachine(ctx, x, y) {
+    const c = this.C;
+    this.rect(ctx, x, y, 18, 28, c.RED);
+    this.rect(ctx, x + 1, y + 1, 16, 12, c.DKGRAY);
+    // Reels
+    this.rect(ctx, x + 2, y + 2, 4, 10, c.WHITE);
+    this.rect(ctx, x + 7, y + 2, 4, 10, c.WHITE);
+    this.rect(ctx, x + 12, y + 2, 4, 10, c.WHITE);
+    // Symbols
+    this.pixel(ctx, x + 3, y + 6, c.RED);
+    this.pixel(ctx, x + 8, y + 6, c.GOLD);
+    this.pixel(ctx, x + 13, y + 6, c.RED);
+    // Handle
+    this.rect(ctx, x + 17, y + 4, 3, 2, c.DKGRAY);
+    this.rect(ctx, x + 18, y + 6, 2, 8, c.GRAY);
+    this.rect(ctx, x + 17, y + 14, 4, 3, c.RED);
+    // Tray
+    this.rect(ctx, x + 1, y + 15, 16, 10, '#222');
+  },
+
+  drawMirrorBall(ctx, x, y, phase) {
+    const c = this.C;
+    ctx.fillStyle = c.GRAY;
+    ctx.beginPath();
+    ctx.arc(x, y, 8, 0, Math.PI * 2);
+    ctx.fill();
+    // Sparkles on the ball
+    for (let i = 0; i < 6; i++) {
+      const a = phase * 2 + i * Math.PI / 3;
+      const sx = x + Math.cos(a) * 5;
+      const sy = y + Math.sin(a) * 5;
+      const bright = Math.sin(phase * 3 + i) * 0.4 + 0.6;
+      const prevAlpha = ctx.globalAlpha;
+      ctx.globalAlpha = bright * prevAlpha;
+      this.pixel(ctx, sx, sy, c.WHITE);
+      ctx.globalAlpha = prevAlpha;
+    }
+    // String
+    this.rect(ctx, x, y - 12, 1, 5, c.DKGRAY);
+  },
+
+  drawCityBuilding(ctx, x, y, w, h, color) {
+    this.rect(ctx, x, y, w, h, color || '#333344');
+    // Windows
+    for (let wy = y + 6; wy < y + h - 6; wy += 10) {
+      for (let wx = x + 4; wx < x + w - 4; wx += 8) {
+        const lit = this.seededRandom(wx * 3 + wy * 7) > 0.3;
+        this.rect(ctx, wx, wy, 4, 5, lit ? '#FFCC44' : '#1a1a2e');
+      }
+    }
+  },
+
+  drawStreetLamp(ctx, x, y) {
+    this.rect(ctx, x, y, 2, 40, '#444');
+    this.rect(ctx, x - 3, y - 2, 8, 3, '#555');
+    this.rect(ctx, x - 1, y - 4, 4, 2, '#FFD700');
+  },
+
+  // ── Bartender NPC ──
+  drawBartender(ctx, x, y, phase) {
+    const c = this.C;
+    this.rect(ctx, x - 4, y - 20, 8, 10, c.WHITE); // shirt
+    this.rect(ctx, x - 3, y - 26, 6, 6, c.SKIN); // head
+    this.rect(ctx, x - 4, y - 28, 8, 2, '#222'); // hair
+    this.rect(ctx, x - 3, y - 10, 3, 10, '#222'); // pants
+    this.rect(ctx, x, y - 10, 3, 10, '#222');
+    this.pixel(ctx, x - 1, y - 24, c.BLACK); // eyes
+    this.pixel(ctx, x + 1, y - 24, c.BLACK);
+    this.rect(ctx, x - 1, y - 22, 3, 1, '#555'); // mustache
+    // Polishing glass
+    const bob = Math.sin(phase * 2) * 1;
+    this.rect(ctx, x + 4, y - 18 + bob, 3, 5, '#AADDFF');
+  },
+
+  // ── Disco DJ ──
+  drawDJ(ctx, x, y, phase) {
+    const c = this.C;
+    this.rect(ctx, x - 4, y - 20, 8, 10, '#222'); // shirt
+    this.rect(ctx, x - 3, y - 26, 6, 6, c.SKIN);
+    this.rect(ctx, x - 4, y - 28, 8, 3, '#FF4444'); // wild hair
+    this.rect(ctx, x - 5, y - 27, 1, 2, '#FF4444');
+    this.rect(ctx, x + 4, y - 27, 1, 2, '#FF4444');
+    this.rect(ctx, x - 3, y - 10, 3, 10, '#222');
+    this.rect(ctx, x, y - 10, 3, 10, '#222');
+    this.pixel(ctx, x - 1, y - 25, c.BLACK);
+    this.pixel(ctx, x + 2, y - 25, c.BLACK);
+    // Headphones
+    this.rect(ctx, x - 4, y - 26, 1, 4, c.DKGRAY);
+    this.rect(ctx, x + 4, y - 26, 1, 4, c.DKGRAY);
+    this.rect(ctx, x - 5, y - 27, 2, 2, c.GRAY);
+    this.rect(ctx, x + 4, y - 27, 2, 2, c.GRAY);
+  },
+
+  // ═══════════════════════════════════════════════
+  //  SPACE QUEST - Character & Drawing
+  // ═══════════════════════════════════════════════
+
+  drawRoger(ctx, x, y, dir, frame, actionAnim) {
+    const c = this.C;
+    // Roger: blue-gray janitor jumpsuit, blond hair, average build
+
+    if (actionAnim) {
+      this.rect(ctx, x - 4, y - 22, 8, 10, '#5577AA'); // jumpsuit
+      this.rect(ctx, x - 3, y - 28, 6, 6, c.SKIN);
+      this.rect(ctx, x - 2, y - 30, 4, 2, c.YELLOW); // blond hair
+      this.rect(ctx, x - 3, y - 12, 3, 6, '#5577AA');
+      this.rect(ctx, x, y - 12, 3, 6, '#5577AA');
+      this.rect(ctx, x - 3, y - 6, 3, 6, '#334455');
+      this.rect(ctx, x, y - 6, 3, 6, '#334455');
+      this.rect(ctx, x + 4, y - 22, 6, 3, '#5577AA'); // reaching arm
+      this.rect(ctx, x + 8, y - 22, 3, 3, c.SKIN);
+      return;
+    }
+
+    const stepOff = (frame >= 0) ? Math.sin(frame * Math.PI / 2) * 2 : 0;
+    const legL = (frame >= 0) ? Math.sin(frame * Math.PI / 2) * 2 : 0;
+    const legR = -legL;
+
+    if (dir === 0 || dir === 2) {
+      // Boots
+      this.rect(ctx, x - 4, y - 6 + legL, 3, 6, '#334455');
+      this.rect(ctx, x + 1, y - 6 + legR, 3, 6, '#334455');
+      // Jumpsuit legs
+      this.rect(ctx, x - 4, y - 12 + legL, 3, 6, '#5577AA');
+      this.rect(ctx, x + 1, y - 12 + legR, 3, 6, '#5577AA');
+      // Jumpsuit body
+      this.rect(ctx, x - 5, y - 22, 10, 10, '#5577AA');
+      // Belt
+      this.rect(ctx, x - 5, y - 13, 10, 1, c.DKGRAY);
+      // Badge/patch
+      this.rect(ctx, x - 3, y - 20, 3, 3, c.ORANGE);
+      // Head
+      this.rect(ctx, x - 3, y - 28, 6, 6, c.SKIN);
+      // Blond hair
+      this.rect(ctx, x - 3, y - 30, 6, 2, c.YELLOW);
+      this.rect(ctx, x - 3, y - 29, 1, 1, c.YELLOW);
+      this.rect(ctx, x + 2, y - 29, 1, 1, c.YELLOW);
+      if (dir === 0) {
+        this.pixel(ctx, x - 1, y - 27, c.BLACK);
+        this.pixel(ctx, x + 1, y - 27, c.BLACK);
+        this.rect(ctx, x - 1, y - 25, 2, 1, c.SKIN); // neutral expression
+      }
+      // Arms
+      this.rect(ctx, x - 7, y - 21 - stepOff, 2, 8, '#5577AA');
+      this.rect(ctx, x + 5, y - 21 + stepOff, 2, 8, '#5577AA');
+    } else {
+      const flip = dir === 3 ? 1 : -1;
+      this.rect(ctx, x - 2 + legL * flip, y - 6, 4, 6, '#334455');
+      this.rect(ctx, x - 2 + legR * flip, y - 6, 4, 6, '#334455');
+      this.rect(ctx, x - 2 + legL * flip, y - 12, 4, 6, '#5577AA');
+      this.rect(ctx, x - 2 + legR * flip, y - 12, 4, 6, '#5577AA');
+      this.rect(ctx, x - 4, y - 22, 8, 10, '#5577AA');
+      this.rect(ctx, x - 4, y - 13, 8, 1, c.DKGRAY);
+      this.rect(ctx, x - 3, y - 28, 6, 6, c.SKIN);
+      this.rect(ctx, x - 2, y - 30, 4, 2, c.YELLOW);
+      this.pixel(ctx, x + flip * 1, y - 27, c.BLACK);
+      this.rect(ctx, x + flip * 3, y - 21, 2, 8, '#5577AA');
+    }
+  },
+
+  // ── SQ Title Screen ──
+  drawTitleScreenSQ(ctx, w, h, phase) {
+    const c = this.C;
+    // Deep space scene
+    ctx.fillStyle = '#000011';
+    ctx.fillRect(0, 0, w, h);
+
+    // Scrolling starfield
+    for (let i = 0; i < 80; i++) {
+      const speed = (this.seededRandom(i * 3) * 2 + 0.5);
+      const sx = (this.seededRandom(i * 7) * w + phase * speed * 30) % w;
+      const sy = this.seededRandom(i * 13) * h;
+      const bright = this.seededRandom(i * 17) * 0.6 + 0.4;
+      const twinkle = Math.sin(phase * 2 + i) * 0.2 + 0.8;
+      ctx.globalAlpha = bright * twinkle;
+      const size = speed > 1.5 ? 2 : 1;
+      this.rect(ctx, sx, sy, size, 1, c.WHITE);
+      ctx.globalAlpha = 1;
+    }
+
+    // Nebula
+    ctx.globalAlpha = 0.15;
+    const grad = ctx.createRadialGradient(w * 0.3, h * 0.4, 10, w * 0.3, h * 0.4, 120);
+    grad.addColorStop(0, '#4400FF');
+    grad.addColorStop(0.5, '#220066');
+    grad.addColorStop(1, 'transparent');
+    ctx.fillStyle = grad;
+    ctx.fillRect(0, 0, w, h);
+    ctx.globalAlpha = 1;
+
+    // Space station / ship
+    const sx = w * 0.5, sy = h * 0.55;
+    // Main hull
+    this.rect(ctx, sx - 40, sy - 5, 80, 10, '#445566');
+    this.rect(ctx, sx - 35, sy - 8, 70, 3, '#556677');
+    // Bridge dome
+    this.rect(ctx, sx - 10, sy - 15, 20, 10, '#334455');
+    ctx.fillStyle = '#00CCFF';
+    ctx.globalAlpha = 0.6 + Math.sin(phase * 2) * 0.2;
+    ctx.fillRect(sx - 7, sy - 13, 14, 6);
+    ctx.globalAlpha = 1;
+    // Engines
+    const engineGlow = Math.sin(phase * 4) * 0.2 + 0.8;
+    ctx.globalAlpha = engineGlow;
+    this.rect(ctx, sx - 42, sy - 2, 4, 5, '#FF6600');
+    this.rect(ctx, sx + 38, sy - 2, 4, 5, '#FF6600');
+    ctx.globalAlpha = 0.3;
+    this.rect(ctx, sx - 48, sy - 1, 6, 3, '#FF3300');
+    this.rect(ctx, sx + 42, sy - 1, 6, 3, '#FF3300');
+    ctx.globalAlpha = 1;
+    // Wings
+    this.rect(ctx, sx - 50, sy + 2, 15, 3, '#334455');
+    this.rect(ctx, sx + 35, sy + 2, 15, 3, '#334455');
+
+    // Planet (bottom corner)
+    ctx.fillStyle = '#113322';
+    ctx.beginPath();
+    ctx.arc(w * 0.85, h + 30, 80, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.fillStyle = '#1a4433';
+    ctx.beginPath();
+    ctx.arc(w * 0.85 + 10, h + 25, 60, 0, Math.PI * 2);
+    ctx.fill();
+  },
+
+  // ── SQ Scene Drawing Helpers ──
+  drawConsolePanel(ctx, x, y, w, h, phase) {
+    const c = this.C;
+    this.rect(ctx, x, y, w, h, '#334455');
+    this.rect(ctx, x + 1, y + 1, w - 2, h - 2, '#223344');
+    // Blinking lights
+    for (let lx = x + 4; lx < x + w - 4; lx += 6) {
+      for (let ly = y + 3; ly < y + h - 3; ly += 5) {
+        const on = Math.sin(phase * 3 + lx + ly * 2) > 0;
+        const colors = [c.RED, c.GREEN, c.YELLOW, '#00CCFF'];
+        const ci = Math.floor(this.seededRandom(lx * 7 + ly * 3) * colors.length);
+        const prevAlpha = ctx.globalAlpha;
+        ctx.globalAlpha = on ? (0.8 * prevAlpha) : (0.2 * prevAlpha);
+        this.rect(ctx, lx, ly, 2, 2, colors[ci]);
+        ctx.globalAlpha = prevAlpha;
+      }
+    }
+  },
+
+  drawViewscreen(ctx, x, y, w, h, phase) {
+    const c = this.C;
+    this.rect(ctx, x - 2, y - 2, w + 4, h + 4, '#445566');
+    ctx.fillStyle = '#000022';
+    ctx.fillRect(x, y, w, h);
+    // Stars through viewscreen
+    ctx.save();
+    ctx.beginPath();
+    ctx.rect(x, y, w, h);
+    ctx.clip();
+    for (let i = 0; i < 15; i++) {
+      const sx = x + (this.seededRandom(i * 7) * w + phase * 10) % w;
+      const sy = y + this.seededRandom(i * 13) * h;
+      this.pixel(ctx, sx, sy, c.WHITE);
+    }
+    ctx.restore();
+  },
+
+  drawAirlock(ctx, x, y, w, h) {
+    this.rect(ctx, x, y, w, h, '#556677');
+    this.rect(ctx, x + 2, y + 2, w - 4, h - 4, '#334455');
+    // Warning stripes
+    for (let sy = y; sy < y + h; sy += 6) {
+      this.rect(ctx, x, sy, 2, 3, '#FFCC00');
+    }
+    for (let sy = y; sy < y + h; sy += 6) {
+      this.rect(ctx, x + w - 2, sy, 2, 3, '#FFCC00');
+    }
+  },
+
+  drawAlienPlant(ctx, x, y, h, color) {
+    const c = this.C;
+    const col = color || '#44CC88';
+    // Stem
+    this.rect(ctx, x - 1, y - h, 2, h, col);
+    // Bulbs
+    ctx.fillStyle = col;
+    ctx.beginPath();
+    ctx.arc(x, y - h, 4, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.beginPath();
+    ctx.arc(x - 3, y - h * 0.6, 3, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.beginPath();
+    ctx.arc(x + 3, y - h * 0.7, 3, 0, Math.PI * 2);
+    ctx.fill();
+  },
+
+  // ── SQ NPCs ──
+  drawAlien(ctx, x, y, phase) {
+    const c = this.C;
+    // Green alien bartender
+    this.rect(ctx, x - 4, y - 20, 8, 10, '#225533'); // body
+    this.rect(ctx, x - 3, y - 28, 6, 8, '#33AA55'); // head (bigger)
+    // Large eyes
+    this.rect(ctx, x - 3, y - 26, 3, 3, c.BLACK);
+    this.rect(ctx, x + 1, y - 26, 3, 3, c.BLACK);
+    this.pixel(ctx, x - 2, y - 25, c.YELLOW);
+    this.pixel(ctx, x + 2, y - 25, c.YELLOW);
+    // Antennae
+    this.rect(ctx, x - 2, y - 30, 1, 3, '#33AA55');
+    this.rect(ctx, x + 2, y - 30, 1, 3, '#33AA55');
+    const bob = Math.sin(phase * 2) * 1;
+    this.pixel(ctx, x - 2, y - 31 + bob, c.YELLOW);
+    this.pixel(ctx, x + 2, y - 31 - bob, c.YELLOW);
+    // Body
+    this.rect(ctx, x - 3, y - 10, 3, 10, '#225533');
+    this.rect(ctx, x, y - 10, 3, 10, '#225533');
+  },
+
+  drawRobot(ctx, x, y, phase) {
+    const c = this.C;
+    // Boxy robot
+    this.rect(ctx, x - 5, y - 20, 10, 12, c.GRAY);
+    this.rect(ctx, x - 4, y - 27, 8, 7, c.LTGRAY);
+    // Eyes (LED)
+    const blink = Math.sin(phase * 3) > 0;
+    this.rect(ctx, x - 2, y - 25, 2, 2, blink ? c.RED : '#330000');
+    this.rect(ctx, x + 1, y - 25, 2, 2, blink ? c.RED : '#330000');
+    // Antenna
+    this.rect(ctx, x, y - 29, 1, 3, c.DKGRAY);
+    this.pixel(ctx, x, y - 30, blink ? '#00FF00' : '#003300');
+    // Legs
+    this.rect(ctx, x - 4, y - 8, 3, 8, c.DKGRAY);
+    this.rect(ctx, x + 1, y - 8, 3, 8, c.DKGRAY);
+    // Arms
+    this.rect(ctx, x - 7, y - 18, 2, 6, c.DKGRAY);
+    this.rect(ctx, x + 5, y - 18, 2, 6, c.DKGRAY);
+  },
+
+  // ═══════════════════════════════════════════════
+  //  POLICE QUEST - Character & Drawing
+  // ═══════════════════════════════════════════════
+
+  drawOfficer(ctx, x, y, dir, frame, actionAnim) {
+    const c = this.C;
+    // Officer Jack Stone: blue uniform, badge, cap
+
+    if (actionAnim) {
+      this.rect(ctx, x - 4, y - 22, 8, 10, '#223366'); // uniform
+      this.rect(ctx, x - 3, y - 28, 6, 6, c.SKIN);
+      this.rect(ctx, x - 4, y - 30, 8, 2, '#112244'); // cap
+      this.rect(ctx, x - 5, y - 29, 10, 1, '#112244'); // brim
+      this.rect(ctx, x - 3, y - 12, 3, 6, '#112244');
+      this.rect(ctx, x, y - 12, 3, 6, '#112244');
+      this.rect(ctx, x - 3, y - 6, 3, 6, '#111');
+      this.rect(ctx, x, y - 6, 3, 6, '#111');
+      this.rect(ctx, x + 4, y - 22, 6, 3, '#223366');
+      this.rect(ctx, x + 8, y - 22, 3, 3, c.SKIN);
+      this.pixel(ctx, x + 2, y - 19, c.GOLD); // badge
+      return;
+    }
+
+    const stepOff = (frame >= 0) ? Math.sin(frame * Math.PI / 2) * 2 : 0;
+    const legL = (frame >= 0) ? Math.sin(frame * Math.PI / 2) * 2 : 0;
+    const legR = -legL;
+
+    if (dir === 0 || dir === 2) {
+      // Shoes
+      this.rect(ctx, x - 4, y - 6 + legL, 3, 6, '#111');
+      this.rect(ctx, x + 1, y - 6 + legR, 3, 6, '#111');
+      // Uniform pants
+      this.rect(ctx, x - 4, y - 12 + legL, 3, 6, '#112244');
+      this.rect(ctx, x + 1, y - 12 + legR, 3, 6, '#112244');
+      // Uniform shirt
+      this.rect(ctx, x - 5, y - 22, 10, 10, '#223366');
+      // Badge
+      this.pixel(ctx, x + 2, y - 19, c.GOLD);
+      this.pixel(ctx, x + 2, y - 18, c.GOLD);
+      // Belt with holster
+      this.rect(ctx, x - 5, y - 13, 10, 2, '#111');
+      this.rect(ctx, x + 3, y - 14, 2, 3, '#333'); // holster
+      // Head
+      this.rect(ctx, x - 3, y - 28, 6, 6, c.SKIN);
+      // Cap
+      this.rect(ctx, x - 4, y - 30, 8, 2, '#112244');
+      this.rect(ctx, x - 5, y - 29, 10, 1, '#112244');
+      if (dir === 0) {
+        // Face
+        this.pixel(ctx, x - 1, y - 27, c.BLACK);
+        this.pixel(ctx, x + 1, y - 27, c.BLACK);
+        this.rect(ctx, x - 1, y - 25, 3, 1, c.SKIN);
+      }
+      // Arms
+      this.rect(ctx, x - 7, y - 21 - stepOff, 2, 8, '#223366');
+      this.rect(ctx, x + 5, y - 21 + stepOff, 2, 8, '#223366');
+    } else {
+      const flip = dir === 3 ? 1 : -1;
+      this.rect(ctx, x - 2 + legL * flip, y - 6, 4, 6, '#111');
+      this.rect(ctx, x - 2 + legR * flip, y - 6, 4, 6, '#111');
+      this.rect(ctx, x - 2 + legL * flip, y - 12, 4, 6, '#112244');
+      this.rect(ctx, x - 2 + legR * flip, y - 12, 4, 6, '#112244');
+      this.rect(ctx, x - 4, y - 22, 8, 10, '#223366');
+      this.rect(ctx, x - 4, y - 13, 8, 2, '#111');
+      this.rect(ctx, x - 3, y - 28, 6, 6, c.SKIN);
+      this.rect(ctx, x - 4, y - 30, 8, 2, '#112244');
+      this.rect(ctx, x - 5, y - 29, 10, 1, '#112244');
+      this.pixel(ctx, x + flip * 1, y - 27, c.BLACK);
+      this.rect(ctx, x + flip * 3, y - 21, 2, 8, '#223366');
+    }
+  },
+
+  // ── PQ Title Screen ──
+  drawTitleScreenPQ(ctx, w, h, phase) {
+    const c = this.C;
+    // Urban night scene
+    this.drawSky(ctx, w, h * 0.5, '#0a1525', '#1a2a40');
+
+    // City skyline
+    const bldgs = [
+      { x: 0, w: 80, h: 200 }, { x: 75, w: 55, h: 250 },
+      { x: 125, w: 90, h: 180 }, { x: 210, w: 60, h: 270 },
+      { x: 265, w: 100, h: 200 }, { x: 360, w: 65, h: 230 },
+      { x: 420, w: 80, h: 190 }, { x: 495, w: 70, h: 260 },
+      { x: 560, w: 80, h: 210 },
+    ];
+    for (const b of bldgs) {
+      this.rect(ctx, b.x, h - b.h, b.w, b.h, '#151a25');
+      for (let wy = h - b.h + 8; wy < h - 30; wy += 12) {
+        for (let wx = b.x + 5; wx < b.x + b.w - 5; wx += 9) {
+          const lit = this.seededRandom(wx * 3 + wy * 7) > 0.5;
+          if (lit) {
+            this.rect(ctx, wx, wy, 4, 5, '#CCAA55');
+          }
+        }
+      }
+    }
+
+    // Street
+    this.rect(ctx, 0, h - 40, w, 40, '#222');
+    this.rect(ctx, 0, h - 42, w, 2, '#444');
+    // Yellow center line
+    for (let lx = 0; lx < w; lx += 20) {
+      this.rect(ctx, lx, h - 22, 10, 2, '#CCAA00');
+    }
+
+    // Police car
+    const carX = w * 0.4 + Math.sin(phase * 0.5) * 5;
+    this.rect(ctx, carX, h - 52, 60, 14, '#1a3366');
+    this.rect(ctx, carX + 10, h - 60, 40, 10, '#2244AA');
+    // Windows
+    this.rect(ctx, carX + 14, h - 58, 14, 6, '#335577');
+    this.rect(ctx, carX + 32, h - 58, 14, 6, '#335577');
+    // Wheels
+    ctx.fillStyle = '#111';
+    ctx.beginPath();
+    ctx.arc(carX + 15, h - 38, 5, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.beginPath();
+    ctx.arc(carX + 45, h - 38, 5, 0, Math.PI * 2);
+    ctx.fill();
+    // Lights (flashing)
+    const flash = Math.sin(phase * 6) > 0;
+    if (flash) {
+      this.rect(ctx, carX + 22, h - 62, 6, 3, '#FF0000');
+      ctx.globalAlpha = 0.2;
+      ctx.fillStyle = '#FF0000';
+      ctx.beginPath();
+      ctx.arc(carX + 25, h - 60, 15, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.globalAlpha = 1;
+    } else {
+      this.rect(ctx, carX + 32, h - 62, 6, 3, '#0044FF');
+      ctx.globalAlpha = 0.2;
+      ctx.fillStyle = '#0044FF';
+      ctx.beginPath();
+      ctx.arc(carX + 35, h - 60, 15, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.globalAlpha = 1;
+    }
+
+    // Street lights
+    for (let lx = 30; lx < w; lx += 150) {
+      this.rect(ctx, lx, h - 90, 2, 50, '#555');
+      this.rect(ctx, lx - 3, h - 92, 8, 3, '#666');
+      ctx.globalAlpha = 0.8;
+      this.rect(ctx, lx - 1, h - 94, 4, 2, '#FFD700');
+      ctx.globalAlpha = 0.1;
+      ctx.fillStyle = '#FFD700';
+      ctx.beginPath();
+      ctx.arc(lx + 1, h - 70, 20, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.globalAlpha = 1;
+    }
+  },
+
+  // ── PQ Scene Drawing Helpers ──
+  drawDesk(ctx, x, y, w) {
+    const c = this.C;
+    this.rect(ctx, x, y, w, 8, c.BROWN);
+    this.rect(ctx, x + 1, y + 1, w - 2, 4, c.LTBROWN);
+    // Legs
+    this.rect(ctx, x + 2, y + 8, 3, 12, c.DKBROWN);
+    this.rect(ctx, x + w - 5, y + 8, 3, 12, c.DKBROWN);
+  },
+
+  drawPoliceCar(ctx, x, y) {
+    const c = this.C;
+    // Side view
+    this.rect(ctx, x, y, 50, 12, '#1a3366');
+    this.rect(ctx, x + 8, y - 8, 34, 9, '#2244AA');
+    this.rect(ctx, x + 11, y - 6, 12, 5, '#446688');
+    this.rect(ctx, x + 27, y - 6, 12, 5, '#446688');
+    // Wheels
+    ctx.fillStyle = '#111';
+    ctx.beginPath();
+    ctx.arc(x + 12, y + 12, 4, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.beginPath();
+    ctx.arc(x + 38, y + 12, 4, 0, Math.PI * 2);
+    ctx.fill();
+    // Light bar
+    this.rect(ctx, x + 18, y - 10, 4, 2, c.RED);
+    this.rect(ctx, x + 28, y - 10, 4, 2, c.BLUE);
+    // Text
+    this.rect(ctx, x + 20, y + 3, 10, 3, c.WHITE);
+  },
+
+  drawEvidenceBoard(ctx, x, y, w, h) {
+    const c = this.C;
+    this.rect(ctx, x, y, w, h, '#2a2a2a');
+    this.rect(ctx, x + 1, y + 1, w - 2, h - 2, '#3a3a3a');
+    // Pinned items
+    const items = [
+      { x: 8, y: 5, w: 12, h: 8, c: c.WHITE },
+      { x: 25, y: 8, w: 10, h: 10, c: '#FFCCCC' },
+      { x: 42, y: 4, w: 14, h: 9, c: c.WHITE },
+      { x: 15, y: 20, w: 8, h: 8, c: '#CCCCFF' },
+      { x: 35, y: 22, w: 12, h: 7, c: c.WHITE },
+    ];
+    for (const item of items) {
+      this.rect(ctx, x + item.x, y + item.y, item.w, item.h, item.c);
+      this.pixel(ctx, x + item.x + item.w / 2, y + item.y, c.RED); // pin
+    }
+    // String connections
+    ctx.strokeStyle = c.RED;
+    ctx.lineWidth = 0.5;
+    ctx.beginPath();
+    ctx.moveTo(x + 14, y + 9);
+    ctx.lineTo(x + 30, y + 13);
+    ctx.lineTo(x + 49, y + 9);
+    ctx.stroke();
+  },
+
+  drawCrimeSceneTape(ctx, x, y, w) {
+    const c = this.C;
+    this.rect(ctx, x, y, w, 3, c.YELLOW);
+    // Diagonal stripes
+    for (let sx = x; sx < x + w; sx += 8) {
+      this.rect(ctx, sx, y, 4, 3, '#111');
+    }
+  },
+
+  drawTrafficLight(ctx, x, y, phase) {
+    this.rect(ctx, x, y + 20, 2, 30, '#444');
+    this.rect(ctx, x - 3, y, 8, 20, '#333');
+    const state = Math.floor(phase) % 3;
+    this.rect(ctx, x - 1, y + 2, 4, 4, state === 0 ? '#FF0000' : '#330000');
+    this.rect(ctx, x - 1, y + 8, 4, 4, state === 1 ? '#FFFF00' : '#333300');
+    this.rect(ctx, x - 1, y + 14, 4, 4, state === 2 ? '#00FF00' : '#003300');
+  },
+
+  // ── PQ NPCs ──
+  drawSergeant(ctx, x, y, phase) {
+    const c = this.C;
+    // Desk sergeant - heavier build
+    this.rect(ctx, x - 5, y - 20, 10, 12, '#223366');
+    this.rect(ctx, x - 4, y - 28, 8, 8, c.SKIN);
+    this.rect(ctx, x - 5, y - 30, 10, 2, '#112244'); // cap
+    this.rect(ctx, x - 4, y - 10, 4, 10, '#112244');
+    this.rect(ctx, x, y - 10, 4, 10, '#112244');
+    this.pixel(ctx, x - 2, y - 26, c.BLACK);
+    this.pixel(ctx, x + 2, y - 26, c.BLACK);
+    // Mustache
+    this.rect(ctx, x - 2, y - 24, 5, 1, '#333');
+    // Badge
+    this.pixel(ctx, x + 3, y - 17, c.GOLD);
+  },
+
+  drawDetective(ctx, x, y, phase) {
+    const c = this.C;
+    // Plain clothes detective
+    this.rect(ctx, x - 4, y - 22, 8, 10, '#554433'); // brown jacket
+    this.rect(ctx, x - 3, y - 28, 6, 6, c.SKIN);
+    this.rect(ctx, x - 3, y - 30, 6, 2, '#333'); // dark hair
+    this.rect(ctx, x - 3, y - 12, 3, 6, '#333');
+    this.rect(ctx, x, y - 12, 3, 6, '#333');
+    this.rect(ctx, x - 3, y - 6, 3, 6, '#222');
+    this.rect(ctx, x, y - 6, 3, 6, '#222');
+    // Tie
+    this.rect(ctx, x, y - 20, 1, 6, c.RED);
+    this.pixel(ctx, x - 1, y - 27, c.BLACK);
+    this.pixel(ctx, x + 1, y - 27, c.BLACK);
   }
 };

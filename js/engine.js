@@ -1,5 +1,5 @@
 /* ============================================
-   King's Quest: The Enchanted Isle
+   Sierra Tribute Collection
    Game Engine - Core game loop, input, state
    ============================================ */
 
@@ -54,6 +54,9 @@ class GameEngine {
     this.sparklePhase = 0;
     this._rafId = null;
     this._dirty = true;
+
+    // Game configuration (set per-game)
+    this.gameConfig = null;
 
     // Scene background cache
     this.bgCache = {};
@@ -1025,17 +1028,18 @@ class GameEngine {
     document.querySelectorAll('.verb-btn').forEach(b => b.classList.remove('active'));
     document.querySelector('[data-verb="walk"]').classList.add('active');
     this.hideAllOverlays();
+
+    // Use game config for maxScore, start scene, and intro
+    const cfg = this.gameConfig || {};
+    this.maxScore = cfg.maxScore || 145;
     if (this._dom.scoreDisplay) this._dom.scoreDisplay.textContent = `Score: 0 of ${this.maxScore}`;
     this.bgCache = {};
     this._bgCacheCanvas = {};
 
-    // Intro cutscene
-    this.changeScene('throneRoom', 160, 135);
-    this.startCutscene([
-      { message: 'In the Kingdom of Daventry, something strange is afoot...', duration: 3000 },
-      { message: 'The castle moat has turned to pudding, the gardens grow backwards, and the royal cat now speaks fluent Latin.', duration: 4500 },
-      { message: 'King Graham must find the source of this magical mayhem and put things right!', duration: 3500 },
-    ]);
+    this.changeScene(cfg.startScene || 'throneRoom', cfg.startX || 160, cfg.startY || 135);
+    if (cfg.introMessages) {
+      this.startCutscene(cfg.introMessages);
+    }
   }
 
   // ── Overlays ──
@@ -1237,7 +1241,8 @@ class GameEngine {
       ctx.translate(px, py);
       ctx.scale(ps, ps);
       ctx.translate(-px, -py);
-      GFX.drawGraham(ctx, px, py,
+      const drawChar = (this.gameConfig && this.gameConfig.drawCharacter) || GFX.drawGraham;
+      drawChar(ctx, px, py,
         this.player.direction, this.player.walking ? this.player.frame : -1,
         this.player.actionAnim);
       ctx.restore();

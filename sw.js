@@ -1,9 +1,9 @@
 /* ============================================
-   King's Quest: The Enchanted Isle
+   Sierra Tribute Collection
    Service Worker - Offline PWA support
    ============================================ */
 
-const CACHE_NAME = 'kq-enchanted-isle-v8';
+const CACHE_NAME = 'sierra-tribute-v9';
 const ASSETS = [
   './',
   './index.html',
@@ -11,6 +11,9 @@ const ASSETS = [
   './js/graphics.js',
   './js/engine.js',
   './js/world.js',
+  './js/world-lsl.js',
+  './js/world-sq.js',
+  './js/world-pq.js',
   './js/account.js',
   './js/app.js',
   './manifest.json',
