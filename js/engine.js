@@ -40,27 +40,20 @@ class GameEngine {
     this.messageTimer = 0;
     this.messageCallback = null;
     this.dialogActive = false;
-    this.dialogData = null;
     this.isDead = false;
     this.hasWon = false;
     this.paused = false;
     this.cutsceneActive = false;
     this.cutsceneSteps = [];
-    this.cutsceneTimer = 0;
 
     // Animation
     this.lastTime = 0;
     this.waterPhase = 0;
     this.sparklePhase = 0;
     this._rafId = null;
-    this._dirty = true;
 
     // Game configuration (set per-game)
     this.gameConfig = null;
-
-    // Scene background cache
-    this.bgCache = {};
-    this._bgCacheCanvas = {};
 
     // Audio
     this.audioCtx = null;
@@ -664,10 +657,6 @@ class GameEngine {
     this.player.actionAnim = null;
     this.player.visible = true;
 
-    // Clear cached background for dynamic scenes
-    delete this.bgCache[sceneId];
-    delete this._bgCacheCanvas[sceneId];
-
     // Update scene name
     if (this._dom.sceneName) this._dom.sceneName.textContent = scene.name || '';
 
@@ -932,8 +921,9 @@ class GameEngine {
 
   // ── Score ──
   addScore(points, reason) {
-    if (this.flags['scored_' + reason]) return; // Prevent double-scoring
-    this.flags['scored_' + reason] = true;
+    const key = reason || ('_auto_' + points + '_' + this.score);
+    if (this.flags['scored_' + key]) return;
+    this.flags['scored_' + key] = true;
     this.score += points;
     this._dom.scoreDisplay.textContent = `Score: ${this.score} of ${this.maxScore}`;
     this.showMessage(`♪ +${points} points! ${reason || ''}`);
@@ -948,8 +938,8 @@ class GameEngine {
 
   // ── Death ──
   die(message) {
-    // Fairy blessing saves Graham once
-    if (this.getFlag('fairy_blessing')) {
+    // Fairy blessing saves the player once (KQ-specific)
+    if (this.getFlag('fairy_blessing') && this.gameConfig && this.gameConfig.id === 'kq') {
       this.setFlag('fairy_blessing', false);
       this.player.walking = false;
       this.player.pendingAction = null;
@@ -971,10 +961,10 @@ class GameEngine {
   }
 
   // ── Victory ──
-  win() {
+  win(message) {
     this.hasWon = true;
     this.player.walking = false;
-    this._dom.victoryMessage.textContent =
+    this._dom.victoryMessage.textContent = message ||
       'King Graham has restored the Crystal of Order! The magical chaos plaguing Daventry has ended, ' +
       'and peace returns to the land. Fumblemore promises to be more careful with his spells... ' +
       'but knowing wizards, that promise probably won\'t last long.';
@@ -1032,12 +1022,21 @@ class GameEngine {
     document.querySelector('[data-verb="walk"]').classList.add('active');
     this.hideAllOverlays();
 
+    // Reset NPC hidden states
+    for (const scene of Object.values(this.scenes)) {
+      if (scene.npcs) {
+        for (const npc of scene.npcs) {
+          if (npc._initialHidden !== undefined) {
+            npc.hidden = npc._initialHidden;
+          }
+        }
+      }
+    }
+
     // Use game config for maxScore, start scene, and intro
     const cfg = this.gameConfig || {};
     this.maxScore = cfg.maxScore || 145;
     if (this._dom.scoreDisplay) this._dom.scoreDisplay.textContent = `Score: 0 of ${this.maxScore}`;
-    this.bgCache = {};
-    this._bgCacheCanvas = {};
 
     this.changeScene(cfg.startScene || 'throneRoom', cfg.startX || 160, cfg.startY || 135);
     if (cfg.introMessages) {

@@ -69,7 +69,7 @@
           if (!eng.getFlag('jukebox_played')) {
             eng.setFlag('jukebox_played');
             eng.showMessage('You put a quarter in. "Stayin\' Alive" starts playing. You begin to dance. Everyone pretends not to notice. (+5 points for courage)');
-            eng.addScore(5);
+            eng.addScore(5, 'lsl_played_jukebox');
           } else {
             eng.showMessage('The jukebox is still playing your last selection. The bartender mouths "please stop."');
           }
@@ -114,7 +114,7 @@
               if (!eng.hasItem('breath_spray') && !eng.getFlag('got_drink')) {
                 eng.setFlag('got_drink');
                 eng.showMessage('The bartender slides you something brown and suspicious. You drink it. It tastes like regret. (+5 points)');
-                eng.addScore(5);
+                eng.addScore(5, 'lsl_ordered_drink');
               } else {
                 eng.showMessage('The bartender pours you another. "You\'re gonna need it," he says, eyeing your leisure suit.');
               }
@@ -212,7 +212,7 @@
             eng.setFlag('took_taxi');
             eng.removeItem('cash');
             eng.showMessage('You hop in the taxi. "$50 to the casino," you say. The driver charges you $49.99. What a deal! (+10 points)');
-            eng.addScore(10);
+            eng.addScore(10, 'lsl_took_taxi');
             setTimeout(() => eng.changeScene('casino', 160, 140), 2500);
           } else {
             eng.showMessage('"No cash, no ride, pal." The taxi driver isn\'t negotiating.');
@@ -315,9 +315,9 @@
         onTake(eng) {
           if (eng.hasItem('breath_spray')) { eng.showMessage('You already have breath spray. One bottle is enough. Probably.'); return; }
           if (eng.getFlag('store_paid')) {
-            eng.addItem('breath_spray', '🧴', 'Breath Spray');
+            eng.addItem('breath_spray', 'Breath Spray', '🧴');
             eng.showMessage('You grab a bottle of MintyFresh 3000. Armed and dangerous! (+10 points)');
-            eng.addScore(10);
+            eng.addScore(10, 'lsl_got_breath_spray');
           } else {
             eng.showMessage('You should probably pay for that first. This isn\'t a self-service breath spray bar.');
           }
@@ -449,7 +449,7 @@
             'You attempt The Worm. You just kind of flop on the ground. The DJ turns the music down to watch.',
             'You do finger guns while shuffling. Someone calls an ambulance, assuming you\'re having a medical event.',
           ];
-          if (count === 0) eng.addScore(5);
+          if (count === 0) eng.addScore(5, 'lsl_first_dance');
           eng.showMessage(responses[Math.min(count, responses.length - 1)]);
         }
       },
@@ -476,9 +476,9 @@
             } else if (choice === 1) {
               if (!eng.hasItem('disco_pass') && !eng.getFlag('got_pass_from_dj')) {
                 eng.setFlag('got_pass_from_dj');
-                eng.addItem('disco_pass', '🎫', 'VIP Pass');
+                eng.addItem('disco_pass', 'VIP Pass', '🎫');
                 eng.showMessage('"Sure man, here\'s a spare VIP pass. Tell \'em Spinz sent ya!" This might come in handy. (+10 points)');
-                eng.addScore(10);
+                eng.addScore(10, 'lsl_got_vip_pass');
               } else {
                 eng.showMessage('"I already gave you one, bro. Don\'t lose it!"');
               }
@@ -563,9 +563,9 @@
           eng.setFlag('slot_tries', tries + 1);
           if (tries === 2) {
             eng.showMessage('🎰 JACKPOT! Three cherries! You win $200 and a complimentary hotel room key! Tonight\'s looking up! (+15 points)');
-            eng.addScore(15);
-            eng.addItem('cash', '💵', 'Cash');
-            eng.addItem('hotel_key', '🔑', 'Hotel Key');
+            eng.addScore(15, 'lsl_won_jackpot');
+            eng.addItem('cash', 'Cash', '💵');
+            eng.addItem('hotel_key', 'Hotel Key', '🔑');
           } else if (tries < 2) {
             eng.showMessage('You pull the lever. Lemon, cherry, banana. Nothing. The machine makes a sad trombone sound.');
           } else {
@@ -676,9 +676,9 @@
         onLook(eng) { eng.showMessage('A vase of beautiful red roses on the reception desk. Very romantic. Very stealable.'); },
         onTake(eng) {
           if (eng.hasItem('flowers')) { eng.showMessage('You already have flowers.'); return; }
-          eng.addItem('flowers', '💐', 'Flowers');
+          eng.addItem('flowers', 'Flowers', '💐');
           eng.showMessage('You swipe the flowers when nobody\'s looking. Smooth criminal. (+5 points)');
-          eng.addScore(5);
+          eng.addScore(5, 'lsl_took_flowers');
         }
       },
       {
@@ -686,13 +686,13 @@
         onLook(eng) { eng.showMessage('A box of fine chocolates, probably left by a previous guest. Finders keepers!'); },
         onTake(eng) {
           if (eng.hasItem('chocolates')) { eng.showMessage('You already snagged the chocolates.'); return; }
-          eng.addItem('chocolates', '🍫', 'Chocolates');
+          eng.addItem('chocolates', 'Chocolates', '🍫');
           eng.showMessage('You pocket the chocolates. A gentleman always comes prepared. (+5 points)');
-          eng.addScore(5);
+          eng.addScore(5, 'lsl_took_chocolates');
         }
       },
       {
-        name: 'reception desk', x: 15, y: 65, w: 80, h: 20,
+        name: 'desk', x: 15, y: 65, w: 80, h: 20,
         onLook(eng) { eng.showMessage('The reception desk is unmanned. A bell sits temptingly in the center.'); },
         onUse(eng) { eng.showMessage('*DING DING DING* You ring the bell enthusiastically. Nobody comes. You ring it twelve more times. Still nobody.'); }
       },
@@ -780,7 +780,7 @@
           if (!eng.getFlag('jacuzzi_used')) {
             eng.setFlag('jacuzzi_used');
             eng.showMessage('You hop in the jacuzzi in your leisure suit. It\'s the happiest moment of your life. (+5 points)');
-            eng.addScore(5);
+            eng.addScore(5, 'lsl_used_jacuzzi');
           } else {
             eng.showMessage('You soak in the jacuzzi again. Your suit will never be the same. Worth it.');
           }
@@ -841,7 +841,7 @@
               eng.removeItem('chocolates');
               eng.removeItem('breath_spray');
               eng.showMessage('Eve takes the gifts and laughs at your terrible jokes. Against all odds, Larry Laffer has found love! (+25 points)');
-              eng.addScore(25);
+              eng.addScore(25, 'lsl_won_eves_heart');
               setTimeout(() => {
                 eng.win('Against all conceivable odds, Larry Laffer has found love in the city of Lost Wages! Eve laughs at his jokes, tolerates his suit, and genuinely enjoys his company. The narrator is genuinely shocked. Congratulations, you hopeless romantic!');
               }, 3000);

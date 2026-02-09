@@ -1825,7 +1825,4 @@
   window.GameWorlds = window.GameWorlds || {};
   window.GameWorlds.kq = kqScenes;
 
-  // Backward compatibility
-  window.GameScenes = kqScenes;
-
 })();

@@ -322,6 +322,17 @@ const App = {
     eng.scenes = worlds[cfg.id] || worlds.kq || window.GameScenes;
     eng.gameConfig = cfg;
 
+    // Snapshot initial NPC hidden states for reset on new game
+    for (const scene of Object.values(eng.scenes)) {
+      if (scene.npcs) {
+        for (const npc of scene.npcs) {
+          if (npc._initialHidden === undefined) {
+            npc._initialHidden = !!npc.hidden;
+          }
+        }
+      }
+    }
+
     if (saveData) {
       eng.loadSaveData(saveData);
     } else {

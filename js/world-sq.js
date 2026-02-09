@@ -65,9 +65,9 @@
         onLook(eng) { eng.showMessage('Your trusty mop. It\'s been through seven decks and two alien invasions with you. Mostly the decks part.'); },
         onTake(eng) {
           if (eng.hasItem('mop')) { eng.showMessage('You already have the mop. One is enough. You\'re a janitor, not a gladiator.'); return; }
-          eng.addItem('mop', '🧹', 'Trusty Mop');
+          eng.addItem('mop', 'Trusty Mop', '🧹');
           eng.showMessage('You grab your mop. It\'s not much of a weapon, but it\'s YOUR not-much-of-a-weapon. (+5 points)');
-          eng.addScore(5);
+          eng.addScore(5, 'sq_took_mop');
         }
       },
       {
@@ -82,9 +82,9 @@
         onUse(eng) {
           if (!eng.getFlag('locker_opened')) {
             eng.setFlag('locker_opened');
-            eng.addItem('keycard', '🪪', 'Access Keycard');
+            eng.addItem('keycard', 'Access Keycard', '🪪');
             eng.showMessage('You open the locker. Inside: a spare uniform, old sandwich (don\'t ask), and your crew access keycard! (+5 points)');
-            eng.addScore(5);
+            eng.addScore(5, 'sq_opened_locker');
           } else {
             eng.showMessage('The locker is empty now. Just the lingering smell of that sandwich. It\'s been there since Tuesday. Tuesday of WHICH week is unclear.');
           }
@@ -272,7 +272,7 @@
           if (!eng.getFlag('sat_captain_chair')) {
             eng.setFlag('sat_captain_chair');
             eng.showMessage('You sit in the captain\'s chair. "Captain\'s log: We\'re in deep trouble and the only hope is the janitor." This log will be classified. (+5 points)');
-            eng.addScore(5);
+            eng.addScore(5, 'sq_sat_captain_chair');
           } else {
             eng.showMessage('You sit in the chair again. "Supplemental: Still the janitor. Still doomed."');
           }
@@ -286,7 +286,7 @@
           if (!eng.getFlag('beacon_sent')) {
             eng.setFlag('beacon_sent');
             eng.showMessage('You activate the distress beacon! It fires off into space. Help could arrive in... 6 to 47 weeks. You\'ll need to rescue the crew yourself. (+10 points)');
-            eng.addScore(10);
+            eng.addScore(10, 'sq_sent_distress_beacon');
           } else {
             eng.showMessage('The beacon has already been sent. Now it\'s just you, a mop, and a bad feeling about all of this.');
           }
@@ -298,9 +298,9 @@
         onUse(eng) {
           if (!eng.getFlag('helm_accessed')) {
             eng.setFlag('helm_accessed');
-            eng.addItem('translator', '📡', 'Universal Translator');
+            eng.addItem('translator', 'Universal Translator', '📡');
             eng.showMessage('You manage to activate one system: the universal translator module! It ejects from the console. Might be useful planetside. (+10 points)');
-            eng.addScore(10);
+            eng.addScore(10, 'sq_got_translator');
           } else {
             eng.showMessage('The console sparks and displays "NICE TRY, JANITOR." Even the computer is roasting you.');
           }
@@ -405,7 +405,7 @@
             eng.removeItem('fuse');
             eng.setFlag('fuse_replaced');
             eng.showMessage('You slot the spare fuse into the box. CLICK. Secondary systems come online! The escape pod bay should be powered now! (+15 points)');
-            eng.addScore(15);
+            eng.addScore(15, 'sq_replaced_fuse');
           } else {
             eng.showMessage('The fuse box needs a replacement fuse. There might be a spare one around here somewhere.');
           }
@@ -416,9 +416,9 @@
         onLook(eng) { eng.showMessage('A spare engine fuse, tucked behind the auxiliary console. Standard issue, compatible with the blown one in the fuse box.'); },
         onTake(eng) {
           if (eng.hasItem('fuse') || eng.getFlag('fuse_replaced')) { eng.showMessage('You don\'t need another fuse.'); return; }
-          eng.addItem('fuse', '🔌', 'Engine Fuse');
+          eng.addItem('fuse', 'Engine Fuse', '🔌');
           eng.showMessage('You pocket the spare fuse. This could restore secondary power! (+5 points)');
-          eng.addScore(5);
+          eng.addScore(5, 'sq_took_fuse');
         }
       },
       {
@@ -493,9 +493,9 @@
         onUse(eng) {
           if (!eng.getFlag('crate_opened')) {
             eng.setFlag('crate_opened');
-            eng.addItem('laser_gun', '🔫', 'Laser Gun');
+            eng.addItem('laser_gun', 'Laser Gun', '🔫');
             eng.showMessage('You open the suspicious crate. Inside: a laser gun! It was labeled as "cleaning supplies" on the manifest. Convenient! (+10 points)');
-            eng.addScore(10);
+            eng.addScore(10, 'sq_found_laser_gun');
           } else {
             eng.showMessage('The other crates contain actual food rations and cleaning supplies. Boring.');
           }
@@ -507,9 +507,9 @@
         onLook(eng) { eng.showMessage('An EVA space suit on a rack. Helmet, boots, life support — the works. You\'d need this to survive on an alien planet.'); },
         onTake(eng) {
           if (eng.hasItem('space_suit')) { eng.showMessage('You\'re already wearing the space suit. One is plenty.'); return; }
-          eng.addItem('space_suit', '🧑‍🚀', 'Space Suit');
+          eng.addItem('space_suit', 'Space Suit', '🧑‍🚀');
           eng.showMessage('You grab the space suit and struggle into it. It\'s two sizes too big. You look like a marshmallow. A brave marshmallow. (+5 points)');
-          eng.addScore(5);
+          eng.addScore(5, 'sq_took_space_suit');
         }
       },
       {
@@ -606,7 +606,7 @@
             return;
           }
           eng.showMessage('You climb into the escape pod, strap in, and hit the launch button. WHOOOOSH! Next stop: Planet Xenon-7! (+10 points)');
-          eng.addScore(10);
+          eng.addScore(10, 'sq_launched_escape_pod');
           setTimeout(() => eng.changeScene('alienPlanet', 160, 130), 2500);
         },
         onTalk(eng) { eng.showMessage('"Ready to launch?" you ask the pod. It hums in response. You choose to interpret that as "yes."'); }
@@ -790,7 +790,7 @@
                 if (!eng.getFlag('got_security_code')) {
                   eng.setFlag('got_security_code');
                   eng.showMessage('Now you know the security code! The alien base awaits. (+10 points)');
-                  eng.addScore(10);
+                  eng.addScore(10, 'sq_learned_security_code');
                 }
               } else {
                 eng.showMessage('"I hear things," Ulnar says, all three eyes shifting. "The walls have ears. Literally. Alien architecture is weird."');
@@ -894,7 +894,7 @@
           if (eng.getFlag('got_security_code')) {
             eng.setFlag('crew_rescued');
             eng.showMessage('You enter code 42-42-42. CLICK! All cells open! The crew rushes out in disbelief. "THE JANITOR SAVED US?!" Captain Willis shakes your hand! (+25 points)');
-            eng.addScore(25);
+            eng.addScore(25, 'sq_rescued_crew');
             setTimeout(() => {
               eng.win('Against all odds, the janitor of the SS Titanium has saved the entire crew! Captain Willis personally recommends you for "Employee of the Month" — for the first time in the ship\'s history. You also get a raise. And a new mop. The galaxy is safe, thanks to the most unlikely hero since... well, ever.');
             }, 3000);

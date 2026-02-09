@@ -3,7 +3,7 @@
    Service Worker - Offline PWA support
    ============================================ */
 
-const CACHE_NAME = 'sierra-tribute-v10';
+const CACHE_NAME = 'sierra-tribute-v11';
 const ASSETS = [
   './',
   './index.html',

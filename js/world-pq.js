@@ -74,9 +74,9 @@
         onLook(eng) { eng.showMessage('The briefing podium. A badge sits on top — your badge. Freshly polished, freshly issued, and not yet dented by the realities of police work.'); },
         onTake(eng) {
           if (eng.hasItem('badge')) { eng.showMessage('You already have your badge. It\'s pinned to your chest. Very shiny.'); return; }
-          eng.addItem('badge', '⭐', 'Police Badge');
+          eng.addItem('badge', 'Police Badge', '⭐');
           eng.showMessage('You pin the badge to your uniform. Officer Jack Stone, Lytton Springs PD. You feel a swell of pride. And a little bit of terror. (+5 points)');
-          eng.addScore(5);
+          eng.addScore(5, 'pq_took_badge');
         }
       },
       {
@@ -102,7 +102,7 @@
               if (!eng.getFlag('got_assignment')) {
                 eng.setFlag('got_assignment');
                 eng.showMessage('Sergeant Morris nods. "Don\'t screw it up, rookie. And for God\'s sake, write everything in your notepad." (+5 points)');
-                eng.addScore(5);
+                eng.addScore(5, 'pq_got_assignment');
               }
             } else {
               eng.showMessage('"We\'ve got witness reports of a blue van near each scene. License plate partial: starts with \'XK.\' That\'s all we\'ve got."');
@@ -182,7 +182,7 @@
           eng.showMessage('The evidence board for the burglary case. Photos of 4 crime scenes. Red string connects them. A note reads: "All electronics stolen. No forced entry. Alarm systems bypassed."');
           if (!eng.getFlag('studied_evidence')) {
             eng.setFlag('studied_evidence');
-            eng.addScore(5);
+            eng.addScore(5, 'pq_studied_evidence');
             eng.showMessage('You study the board carefully. Pattern: all victims had "SmartHome" brand security. The burglar knows how to disable them. (+5 points)');
           }
         },
@@ -194,9 +194,9 @@
         onLook(eng) { eng.showMessage('A police-issue notepad. Essential for any investigation. You\'d better take it.'); },
         onTake(eng) {
           if (eng.hasItem('notepad')) { eng.showMessage('You already have your notepad. Old school, but reliable.'); return; }
-          eng.addItem('notepad', '📝', 'Notepad');
+          eng.addItem('notepad', 'Notepad', '📝');
           eng.showMessage('You grab the notepad and a pen. Ready to document everything. Sergeant Morris would be proud. (+5 points)');
-          eng.addScore(5);
+          eng.addScore(5, 'pq_took_notepad');
         }
       },
       {
@@ -208,7 +208,7 @@
           } else if (eng.hasItem('notepad')) {
             eng.setFlag('searched_database');
             eng.showMessage('You search the database for SmartHome installation records. One name pops up: Vince Krawley — fired employee, 3 prior theft charges! Address: Warehouse District. (+10 points)');
-            eng.addScore(10);
+            eng.addScore(10, 'pq_searched_database');
           } else {
             eng.showMessage('You should grab your notepad first. Can\'t investigate without writing things down!');
           }
@@ -329,7 +329,7 @@
               if (!eng.getFlag('witness_statement')) {
                 eng.setFlag('witness_statement');
                 eng.showMessage('You write down Mrs. Henderson\'s statement in your notepad. Blue van + SmartHome uniform = inside job! (+10 points)');
-                eng.addScore(10);
+                eng.addScore(10, 'pq_got_witness_statement');
               }
             } else {
               eng.showMessage('"He was about yea tall," she gestures vaguely, "and he had a... face. Definitely had a face. I\'m quite sure of that."');
@@ -418,7 +418,7 @@
           if (eng.getFlag('collected_footprint')) { eng.showMessage('You already collected the footprint evidence.'); return; }
           eng.setFlag('collected_footprint');
           eng.showMessage('You carefully photograph and cast the footprint. Size 11 work boot, same brand issued to SmartHome technicians! (+10 points)');
-          eng.addScore(10);
+          eng.addScore(10, 'pq_collected_footprint');
         },
         onTake(eng) { eng.showMessage('You can\'t just scoop up a footprint! You need proper evidence collection procedures. Use an evidence bag.'); }
       },
@@ -429,7 +429,7 @@
           if (!eng.getFlag('checked_alarm')) {
             eng.setFlag('checked_alarm');
             eng.showMessage('Serial number: SH-4422. You note it in your pad. This can be cross-referenced with SmartHome installation records. (+5 points)');
-            eng.addScore(5);
+            eng.addScore(5, 'pq_checked_alarm_serial');
           } else {
             eng.showMessage('You already noted the serial number.');
           }
@@ -454,7 +454,7 @@
         eng.setFlag('crime_intro');
         eng.showMessage('The burglarized electronics store. Crime scene tape marks the perimeter. Evidence markers dot the floor. The SmartHome alarm panel hangs open on the wall.');
         if (!eng.hasItem('evidence_bag')) {
-          eng.addItem('evidence_bag', '🔍', 'Evidence Bag');
+          eng.addItem('evidence_bag', 'Evidence Bag', '🔍');
           eng.showMessage('You grab an evidence collection kit from the scene supplies.');
         }
       }
@@ -555,10 +555,10 @@
           eng.showDialog('Informant', '"Officer, you didn\'t hear this from me. Krawley\'s warehouse — the stolen goods are stashed there. He moves them Thursday nights. You\'ve got till then."', ['How do you know this?', 'I\'ll check it out.'], (choice) => {
             if (choice === 0) {
               eng.showMessage('"Let\'s just say I owe some people some favors. And I don\'t like burglars in MY neighborhood." He walks away quickly. (+5 points)');
-              eng.addScore(5);
+              eng.addScore(5, 'pq_informant_source');
             } else {
               eng.showMessage('The man nods and walks away briskly, disappearing around a corner. Time to check out that warehouse. (+5 points)');
-              eng.addScore(5);
+              eng.addScore(5, 'pq_informant_lead');
             }
           });
         }
@@ -635,7 +635,7 @@
           if (!eng.getFlag('photographed_evidence')) {
             eng.setFlag('photographed_evidence');
             eng.showMessage('You photograph the stolen goods with serial numbers visible. This will match the stolen items report perfectly! (+10 points)');
-            eng.addScore(10);
+            eng.addScore(10, 'pq_photographed_evidence');
           } else {
             eng.showMessage('You already documented the evidence. Now you need to deal with Krawley.');
           }
@@ -648,7 +648,7 @@
           if (!eng.getFlag('checked_van')) {
             eng.setFlag('checked_van');
             eng.showMessage('You check the van. SmartHome uniform in the front seat, lockpick set in the glovebox. Krawley wasn\'t even trying to hide it. (+5 points)');
-            eng.addScore(5);
+            eng.addScore(5, 'pq_searched_van');
           } else {
             eng.showMessage('You already searched the van.');
           }
@@ -659,9 +659,9 @@
         onLook(eng) { eng.showMessage('A pair of handcuffs on the workbench. Standard issue. You should grab these — you might need them.'); },
         onTake(eng) {
           if (eng.hasItem('handcuffs')) { eng.showMessage('You already have handcuffs.'); return; }
-          eng.addItem('handcuffs', '⛓️', 'Handcuffs');
+          eng.addItem('handcuffs', 'Handcuffs', '⛓️');
           eng.showMessage('You grab the handcuffs. Time to make an arrest. (+5 points)');
-          eng.addScore(5);
+          eng.addScore(5, 'pq_took_handcuffs');
         }
       },
       {
@@ -693,7 +693,7 @@
               if (eng.hasItem('handcuffs')) {
                 eng.setFlag('krawley_arrested');
                 eng.showMessage('"Vince Krawley, you\'re under arrest for burglary, theft, and being really bad at hiding evidence." You slap on the cuffs. (+25 points)');
-                eng.addScore(25);
+                eng.addScore(25, 'pq_arrested_krawley');
                 setTimeout(() => {
                   eng.win('Officer Jack Stone has cracked the burglary ring! Vince Krawley is in custody, the stolen goods recovered, and all four stores will get their merchandise back. Sergeant Morris personally congratulates you: "Not bad, rookie. Not bad at all." You were promoted to Detective within the month. The "WORLD\'S OKAYEST COP" mug was retired. Your new one says "WORLD\'S OKAYEST DETECTIVE."');
                 }, 3000);
@@ -709,7 +709,7 @@
           if (!eng.getFlag('krawley_arrested') && eng.hasItem('handcuffs')) {
             eng.setFlag('krawley_arrested');
             eng.showMessage('You tackle Krawley and slap the cuffs on. "You have the right to remain silent!" Krawley exercises that right by swearing loudly. (+25 points)');
-            eng.addScore(25);
+            eng.addScore(25, 'pq_tackled_krawley');
             setTimeout(() => {
               eng.win('Officer Jack Stone has cracked the burglary ring! Vince Krawley is in custody, the stolen goods recovered, and downtown Lytton Springs is safe once more. Sergeant Morris buys you a coffee: "Told you not to screw it up, Stone. And you didn\'t." High praise indeed.');
             }, 3000);
